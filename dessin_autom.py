@@ -5,6 +5,7 @@ import math
 from tkinter import colorchooser
 from time import sleep
 
+
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
@@ -15,21 +16,12 @@ filled = False
 turtle.bgcolor("#212121")
 blk = (0, 0, 0)
 
-
-print('''
-
-                 ____                _            _         _        
-                |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
-                | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
-                | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
-                |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/   
-
-                                                                            ''')
 #############Start Function#############
 try:
     def kickstart():
         try:
             sleep(0.75)
+            print()
             print(" 1. Carré")
             print(" 2. Rectangle")
             print(" 3. Triangles ")
@@ -321,4 +313,13 @@ except Exception as e:
     else:
         pass
 if __name__ == "__main__":
+    print(r'''
+
+                     ____                _            _         _        
+                    |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
+                    | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
+                    | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
+                    |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/   
+
+                                                                                ''')
     kickstart()

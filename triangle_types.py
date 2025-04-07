@@ -3,7 +3,7 @@ from time import sleep
 from tkinter import colorchooser
 import dessin_autom
 import math
-from myFunctions import sqArea, px2ToCm2, triArea, rectArea
+from myFunctions import px2ToCm2, triArea
 ###########Logic#############
 
 screen = turtle.Screen()
@@ -16,21 +16,12 @@ filled = False
 turtle.bgcolor("#212121")
 blk = (0, 0, 0)
 
-
-print('''
-
-                 ____                _            _         _        
-                |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
-                | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
-                | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
-                |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/   
-
-                                                                            ''')
 #############Start Function#############
 try:
     def tkickstart():
         try:
             sleep(0.75)
+            print()
             print(" 1. Triangle équilatéral")
             print(" 2. Triangle rectangle")
             print(" 3. Triangle isocèle")
