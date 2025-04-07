@@ -1,5 +1,6 @@
 import turtle
 from myFunctions import sqArea, rectArea, triArea, px2ToCm2
+import triangle_types
 import math
 from tkinter import colorchooser
 from time import sleep
@@ -31,7 +32,7 @@ try:
             sleep(0.75)
             print(" 1. Carré")
             print(" 2. Rectangle")
-            print(" 3. Triangle (équilatéral)")
+            print(" 3. Triangles ")
             print("Les unités sont en pixels et degrés")
             global forme
             forme = int(input("Choisissez une option : "))
@@ -44,7 +45,8 @@ try:
                     cAsk()
                 case 3:
                     print("Vous avez choisi le triangle !")
-                    cAsk()
+                    print("Trois types sont disponibles : ")
+                    triangle_types.tkickstart()
             if forme not in [1, 2, 3]:
                 print("Cette option est inexistante")
                 sleep(0.5)
