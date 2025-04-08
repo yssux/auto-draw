@@ -1,10 +1,8 @@
 import turtle
-from myFunctions import sqArea, rectArea, triArea, px2ToCm2
+from myFunctions import sqArea, rectArea, px2ToCm2
 import triangle_types
-import math
 from tkinter import colorchooser
 from time import sleep
-
 
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
@@ -15,7 +13,6 @@ outline = False
 filled = False
 turtle.bgcolor("#212121")
 blk = (0, 0, 0)
-
 #############Start Function#############
 try:
     def kickstart():
@@ -37,6 +34,7 @@ try:
                     cAsk()
                 case 3:
                     print("Vous avez choisi le triangle !")
+                    print()
                     print("Trois types sont disponibles : ")
                     triangle_types.tkickstart()
             if forme not in [1, 2, 3]:
@@ -209,24 +207,6 @@ try:
                     self.ending()
                     turtle.done()
 
-
-                case 3:
-                    print()
-                    try:
-                        self.c_tri = float(input("Insérez le côté désiré pour ce triangle : "))
-                    except ValueError:
-                        print("Veuillez entrer un nombre valide")
-                        self.logicCaller()
-                    if filling:
-                        self.triangle(self.c_tri, True, self.chosen_c)
-                    if outlined and self.outColored:
-                        self.outDraw(self.triangle, self.outSize, self.outColor)
-                    elif outlined and not self.outColored:
-                        self.outDraw(self.triangle, self.outSize, None)
-                    else:
-                        self.triangle(self.c_tri, False, None)
-                    self.ending()
-                    turtle.done()
         def ending(self):
             if self.forme == 1 :
                 fin = "carré"
@@ -236,11 +216,6 @@ try:
                 fin = "rectangle"
                 srf = rectArea(self.h_rect, self.l_rect)
                 prps = f"de hauteur {self.h_rect} et de largeur {self.l_rect} pixels"
-            elif self.forme == 3 :
-                fin = "triangle"
-                htr = round(math.sqrt(3)/2 * self.c_tri, 2)
-                srf = triArea(self.c_tri, htr)
-                prps = f"de coté {self.c_tri} et d'hauteur {htr} pixels"
             print()
             print(f"Votre {fin}, {prps}, d'aire {srf} pixels ou {px2ToCm2(srf)} centimètres a été dessiné")
 
@@ -275,11 +250,6 @@ try:
                 turtle.left(90)
                 turtle.forward(height)
                 turtle.left(90)
-
-        def outTri(self, side):
-            for _ in range(3):
-                turtle.forward(side)
-                turtle.left(120)
 
     logic = Logic()
 

@@ -3,7 +3,7 @@ from time import sleep
 from tkinter import colorchooser
 import dessin_autom
 import math
-from myFunctions import px2ToCm2, triArea
+from myFunctions import px2ToCm2 as cm , tri_equiArea,tri_isoArea, tri_rectArea
 ###########Logic#############
 
 screen = turtle.Screen()
@@ -66,18 +66,28 @@ try:
             t.end_fill()
 
 
-    def tri_iso(side, base):
+    def tri_iso(side, base, fill, source):
         screen.cv._rootwindow.deiconify()
         t = turtle.Turtle()
-        angle = math.acos((2 * side ** 2 - base ** 2) / (2 * side ** 2))
-        angle_deg = math.degrees(angle)
+        if source == None:
+            t.color(blk)
+        elif fill == True and bool(source) == True:
+            fcolor = source
+            t.color(fcolor)
+            t.begin_fill()
 
+        height = (side ** 2 - (base / 2) ** 2) ** 0.5
+        # Draw the isosceles triangle
+        angle = math.degrees(math.atan(height / (base / 2)))
+
+        # Draw the isosceles triangle
+        t.forward(base)  # Draw the base
+        t.left(180 - angle)  # Turn to draw the first equal side
+        t.forward(side)  # Draw the first equal side
+        t.left(2 * angle)  # Turn to draw the second equal side
         t.forward(side)
-        t.left(180 - angle_deg)
-
-        t.forward(side)
-        t.left(180 - (2 * angle_deg))
-
+        if fill == True:
+            t.end_fill()
 
     def tri_rect(a, b,fill, source):
         screen.cv._rootwindow.deiconify()
@@ -220,27 +230,31 @@ try:
                         print("Veuillez entrer un nombre valide")
                         self.tlogicCaller()
                     if filling:
-                        self.tri_iso(self.c_tri,self.b_tri, True, self.chosen_c)
+                        self.tri_iso(self.c_iso,self.b_iso, True, self.chosen_c)
                     if outlined and self.outColored:
                         self.outDraw(self.tri_iso, self.outSize, self.outColor)
                     elif outlined and not self.outColored:
                         self.outDraw(self.tri_iso, self.outSize, None)
                     else:
-                        self.triangle(self.c_tri,self.b_tri, False, None)
+                        self.tri_iso(self.c_iso,self.b_iso, False, None)
                     self.ending()
                     turtle.done()
         def ending(self):
             if self.tforme == 1 :
                 fin = "triangle équilatéral"
                 prps = f"de coté {self.c_equi} pixels"
+                tsrf = f"de surface {tri_equiArea(self.c_equi, self.c_equi)} ou {cm(tri_equiArea(self.c_equi, self.c_equi))} centimètres"
             elif self.tforme == 2:
                 fin = "triangle rectangle"
                 prps = f"de hauteur {self.th_rect} et de largeur {self.tl_rect} pixels"
+                tsrf = f"de surface {tri_rectArea(self.tl_rect, self.th_rect)} pixels ou {cm(tri_rectArea(self.tl_rect,self.th_rect))} centimètres"
             elif self.tforme == 3 :
                 fin = "triangle isocèle"
+                h_iso = math.sqrt(self.c_iso ** 2 -(self.b_iso ** 2) / 2)
                 prps = f"de coté {self.c_iso} et de base {self.b_iso} pixels"
+                tsrf = f"de surface {tri_isoArea(self.b_iso, h_iso)} pixels ou {cm(tri_isoArea(self.b_iso, h_iso))}"
             print()
-            print(f"Votre {fin}, {prps}, a été dessiné")
+            print(f"Votre {fin}, {prps}, {tsrf} a été dessiné")
 
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
@@ -322,6 +336,4 @@ except Exception as e:
         tkickstart()
     else:
         pass
-if __name__ == "__main__":
-    tkickstart()
 
