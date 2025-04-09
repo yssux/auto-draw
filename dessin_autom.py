@@ -211,6 +211,8 @@ try:
                         self.logicCaller()
                     if filling:
                         self.rect(self.h_rect, self.l_rect, True, self.chosen_c)
+                    elif not filling:
+                        self.rect(self.h_rect, self.l_rect, False, None)
                     if outlined and self.outColored:
                         self.outDraw(self.rect, self.outSize, self.outColor)
                     elif outlined and not self.outColored:
@@ -289,8 +291,8 @@ try:
         else:
             pass
 except Exception as e:
-    print(f"Une erreur est survenue : {e}")
-    restart = input("Voulez-vous relancer le programme ? (y/n) : ")
+    print(f"[bold red]Une erreur est survenue : {e}[/bold red]")
+    restart = Prompt.ask("[bold cyan]Voulez-vous relancer le programme ? (y/n) [/bold cyan]")
     if restart == "y":
         kickstart()
     else:
