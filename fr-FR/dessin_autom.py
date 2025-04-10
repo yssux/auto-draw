@@ -1,9 +1,19 @@
 import turtle
-from myFunctions import sqArea, rectArea, px2ToCm2
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
 import triangle_types
+from rich.console import Console
+from rich import print
+from rich.prompt import Prompt
 from tkinter import colorchooser
 from time import sleep
+from pathlib import Path
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+from myFunctions import px2ToCm2, sqArea, rectArea
 
+console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
@@ -13,37 +23,52 @@ outline = False
 filled = False
 turtle.bgcolor("#212121")
 blk = (0, 0, 0)
+print( r'''[bold yellow]   
+                     ____                _            _         _        
+                    |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
+                    | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
+                    | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
+                    |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/  [/bold yellow]''')
 #############Start Function#############
 try:
     def kickstart():
         try:
-            sleep(0.75)
+            sleep(0.50)
             print()
-            print(" 1. Carré")
-            print(" 2. Rectangle")
-            print(" 3. Triangles ")
-            print("Les unités sont en pixels et degrés")
+            console.print("[bold yellow]1.[/bold yellow] [cyan]Carré[/cyan]")
+            console.print("[bold yellow]2.[/bold yellow] [cyan]Rectangle[/cyan]")
+            console.print("[bold yellow]3.[/bold yellow] [cyan]Triangles[/cyan]")
+            print()
+            console.print("[underline][bold magenta]Les unités sont en pixels et degrés[/bold magenta][/underline]")
+
+            # Get user choice with a prompt
             global forme
-            forme = int(input("Choisissez une option : "))
+            print()
+            forme = int(Prompt.ask("[bold blue]Choisissez une option (1-3) [/bold blue]"))
+
             match forme:
                 case 1:
-                    print("Vous avez choisi le carré !")
-                    cAsk()
-                case 2:
-                    print("Vous avez choisi le rectangle")
-                    cAsk()
-                case 3:
-                    print("Vous avez choisi le triangle !")
                     print()
-                    print("Trois types sont disponibles : ")
-                    triangle_types.tkickstart()
+                    console.print("[bold yellow]Vous avez choisi le carré ![/bold yellow]")
+                    cAsk()  # Call the square function (cAsk())
+                case 2:
+                    print()
+                    console.print("[bold yellow]Vous avez choisi le rectangle ![/bold yellow]")
+                    cAsk()  # Call the rectangle function (cAsk())
+                case 3:
+                    print()
+                    console.print("[bold yellow]Vous avez choisi le triangle ![/bold yellow]")
+                    console.print()
+                    console.print("[underline]Trois types sont disponibles :[/underline]")
+                    triangle_types.tkickstart()  # Call the triangle types function (tkickstart)
+
             if forme not in [1, 2, 3]:
-                print("Cette option est inexistante")
+                console.print("[bold red]Cette option est inexistante[/bold red]")
                 sleep(0.5)
-                kickstart()
+                kickstart()  # Retry if invalid input
         except ValueError:
-            print("Veuillez entrer un nombre valide entre 1 et 3")
-            kickstart()
+            console.print("[bold red]Veuillez entrer un nombre valide entre 1 et 3[/bold red]")
+            kickstart()  # Retry if invalid input
     #geometry functions
 
 
@@ -131,16 +156,16 @@ try:
         def outAsk(self):
             global outline
             try:
-                outline = str(input("Voulez-vous ajouter un contour à votre forme, et, au choix, customizer sa couleur (1px en noir par défaut sinon) ? (y/n) : "))
+                outline = str(Prompt.ask("[bold green]Voulez-vous ajouter un contour à votre forme, et, au choix, customizer sa couleur (1px en noir par défaut sinon) ? (y/n)[/bold green] "))
             except ValueError:
-                print("Veuillez entrer une option valide")
+                print("[bold red]Veuillez entrer une option valide")
                 self.outAsk()
             if outline == "y":
                 try:
-                    self.outSize = float(input("Précisez la taille de votre contour : "))
-                    self.outColoring = str(input("Voulez vous choisir une couleur pour votre contour ? (y/n) : "))
+                    self.outSize = float(Prompt.ask("[bold magenta]Précisez la taille de votre contour [/bold magenta]"))
+                    self.outColoring = str(Prompt.ask("[bold green]Voulez vous choisir une couleur pour votre contour ? (y/n) [/bold green]"))
                 except ValueError:
-                    print("Veuillez entrer un nombre/option valide")
+                    print("[bold red]Veuillez entrer un nombre/option valide")
                     self.outAsk()
                 if self.outColoring == "y":
                     self.outColored = True
@@ -153,7 +178,7 @@ try:
                 outline = False
                 self.logicCaller()
             else:
-                print("Veuillez entrer une option valide")
+                print("[bold red]Veuillez entrer une option valide")
                 self.outAsk()
 
         def logicCaller(self):
@@ -173,9 +198,9 @@ try:
                 case 1:
                     print()
                     try:
-                        self.c_carr = float(input("Insérez la mesure du côté désiré : "))
+                        self.c_carr = float(Prompt.ask("[bold yellow]Insérez la mesure du côté désiré [/bold yellow]"))
                     except ValueError:
-                        print("Veuillez entrer un nombre valide")
+                        print("[bold red]Veuillez entrer un nombre valide")
                         self.logicCaller()
                     if filling:
                         self.square(self.c_carr, True, self.chosen_c)
@@ -191,13 +216,15 @@ try:
                 case 2:
                     print()
                     try:
-                        self.h_rect = float(input("Insérez la hauteur désirée : "))
-                        self.l_rect = float(input("Insérez la largeur désirée : "))
+                        self.h_rect = float(Prompt.ask("[bold green]Insérez la hauteur désirée [/bold green]"))
+                        self.l_rect = float(Prompt.ask("[bold yellow]Insérez la largeur désirée [/bold yellow]"))
                     except ValueError:
-                        print("Veuillez entrer un nombre valide")
+                        print("[bold red]Veuillez entrer un nombre valide")
                         self.logicCaller()
                     if filling:
                         self.rect(self.h_rect, self.l_rect, True, self.chosen_c)
+                    elif not filling:
+                        self.rect(self.h_rect, self.l_rect, False, None)
                     if outlined and self.outColored:
                         self.outDraw(self.rect, self.outSize, self.outColor)
                     elif outlined and not self.outColored:
@@ -217,7 +244,7 @@ try:
                 srf = rectArea(self.h_rect, self.l_rect)
                 prps = f"de hauteur {self.h_rect} et de largeur {self.l_rect} pixels"
             print()
-            print(f"Votre {fin}, {prps}, d'aire {srf} pixels ou {px2ToCm2(srf)} centimètres a été dessiné")
+            print(f"[bold cyan]Votre {fin}, [bold red]{prps}[/bold red], d'aire [bold red]{srf}[/bold red] pixels ou [bold red]{px2ToCm2(srf)}[/bold red] centimètres a été dessiné ![/bold cyan]")
 
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
@@ -258,7 +285,7 @@ try:
         global filled
         print()
         try:
-            fill = input("Voulez vous remplir votre forme ? (y/n) : ")
+            fill = Prompt.ask("[bold magenta]Voulez vous remplir votre forme ? (y/n) [/bold magenta]")
         except ValueError:
             print("Veuillez entrer une option valide")
             cAsk()
@@ -276,20 +303,10 @@ try:
         else:
             pass
 except Exception as e:
-    print(f"Une erreur est survenue : {e}")
-    restart = input("Voulez-vous relancer le programme ? (y/n) : ")
+    print(f"[bold red]Une erreur est survenue : {e}[/bold red]")
+    restart = Prompt.ask("[bold cyan]Voulez-vous relancer le programme ? (y/n) [/bold cyan]")
     if restart == "y":
         kickstart()
     else:
         pass
-if __name__ == "__main__":
-    print(r'''
-
-                     ____                _            _         _        
-                    |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
-                    | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
-                    | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
-                    |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/   
-
-                                                                                ''')
-    kickstart()
+kickstart()
