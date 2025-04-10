@@ -1,11 +1,17 @@
 import turtle
-from myFunctions import sqArea, rectArea, px2ToCm2
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
 import triangle_types
 from rich.console import Console
 from rich import print
 from rich.prompt import Prompt
 from tkinter import colorchooser
 from time import sleep
+from pathlib import Path
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+from myFunctions import px2ToCm2, sqArea, rectArea
 
 console = Console()
 screen = turtle.Screen()
@@ -17,6 +23,12 @@ outline = False
 filled = False
 turtle.bgcolor("#212121")
 blk = (0, 0, 0)
+print( r'''[bold yellow]   
+                     ____                _            _         _        
+                    |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
+                    | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
+                    | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
+                    |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/  [/bold yellow]''')
 #############Start Function#############
 try:
     def kickstart():
@@ -297,11 +309,4 @@ except Exception as e:
         kickstart()
     else:
         pass
-if __name__ == "__main__":
-    print(r'''[bold yellow]   
-                     ____                _            _         _        
-                    |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
-                    | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
-                    | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
-                    |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/  [/bold yellow]''')
-    kickstart()
+kickstart()
