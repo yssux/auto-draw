@@ -1,11 +1,14 @@
 import turtle
 from time import sleep
 from tkinter import colorchooser
+from rich.console import Console
+from rich import print
+from rich.prompt import Prompt
 import dessin_autom
 import math
 from myFunctions import px2ToCm2 as cm , tri_equiArea,tri_isoArea, tri_rectArea
 ###########Logic#############
-
+console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
@@ -22,30 +25,30 @@ try:
         try:
             sleep(0.75)
             print()
-            print(" 1. Triangle équilatéral")
-            print(" 2. Triangle rectangle")
-            print(" 3. Triangle isocèle")
-            print(" 4. Revenir au menu principal")
+            console.print("[bold yellow]1.[/bold yellow] [cyan]Triangle équilatéral[/cyan]")
+            console.print("[bold yellow]2.[/bold yellow] [cyan]Triangle rectangle[/cyan]")
+            console.print("[bold yellow]3.[/bold yellow] [cyan]Triangle isocèle[/cyan]")
+            console.print("[bold yellow]4.[/bold yellow] [cyan]Revenir au menu principal[/cyan]")
             global tforme
-            tforme = int(input("Choisissez une option : "))
+            tforme = int(Prompt.ask("[bold magenta]Choisissez une option [/bold magenta]"))
             match tforme:
                 case 1:
-                    print("Vous avez choisi le triangle équilatéral !")
+                    console.print("[yellow]Vous avez choisi le triangle équilatéral ![/yellow]")
                     cAsk()
                 case 2:
-                    print("Vous avez choisi le triangle rectangle ! ")
+                    console.print("[yellow]Vous avez choisi le triangle rectangle ! [/yellow]")
                     cAsk()
                 case 3:
-                    print("Vous avez choisi le triangle isocèle !")
+                    console.print("[yellow )Vous avez choisi le triangle isocèle ![/yellow]")
                     cAsk()
                 case 4:
                     dessin_autom.kickstart()
             if tforme not in [1, 2, 3]:
-                print("Cette option est inexistante")
+                console.print("[bold red]Cette option est inexistante[/bold red]")
                 sleep(0.5)
                 tkickstart()
         except ValueError:
-            print("Veuillez entrer un nombre valide entre 1 et 3")
+            console.print("[bold red]Veuillez entrer un nombre valide entre 1 et 3[/bold red]")
             tkickstart()
     #geometry functions
 
@@ -127,14 +130,14 @@ try:
             if gui_chooser[1] is not None:
                 if outline:
                     self.outColor = gui_chooser[1]
-                    print(f"Couleur de contour choisie : {self.outColor}")
+                    console.print(f"[cyan]Couleur de contour choisie : {self.outColor}")
                     self.tlogicCaller()
                 elif outline == False:
                     self.chosen_c = gui_chooser[1]
-                    print(f"Couleur de remplissage choisie : {self.chosen_c}")
+                    print(f"[cyan]Couleur de remplissage choisie : {self.chosen_c}")
                     self.outAsk()
             elif gui_chooser[1] is None:
-                print("Veuillez choisir une couleur")
+                console.print("[bold red]Veuillez choisir une couleur[/bold red]")
                 if self.outColored:
                     self.cChooser(True)
                 elif not self.outColored:
@@ -143,16 +146,16 @@ try:
         def outAsk(self):
             global outline
             try:
-                outline = str(input("Voulez-vous ajouter un contour à votre forme, et, au choix, customizer sa couleur (1px en noir par défaut sinon) ? (y/n) : "))
+                outline = str(Prompt.ask("[bold green]Voulez-vous ajouter un contour à votre forme, et, au choix, customizer sa couleur (1px en noir par défaut sinon) ? (y/n) [/bold green]"))
             except ValueError:
-                print("Veuillez entrer une option valide")
+                console.print("[bold red]Veuillez entrer une option valide")
                 self.outAsk()
             if outline == "y":
                 try:
-                    self.outSize = float(input("Précisez la taille de votre contour : "))
-                    self.outColoring = str(input("Voulez vous choisir une couleur pour votre contour ? (y/n) : "))
+                    self.outSize = float(Prompt.ask("[bold blue]Précisez la taille de votre contour "))
+                    self.outColoring = str(Prompt.ask("[bold green]Voulez vous choisir une couleur pour votre contour ? (y/n) "))
                 except ValueError:
-                    print("Veuillez entrer un nombre/option valide")
+                    console.print("[bold red]Veuillez entrer un nombre/option valide")
                     self.outAsk()
                 if self.outColoring == "y":
                     self.outColored = True
@@ -165,7 +168,7 @@ try:
                 outline = False
                 self.tlogicCaller()
             else:
-                print("Veuillez entrer une option valide")
+                console.print("[bold red]Veuillez entrer une option valide")
                 self.outAsk()
 
         def tlogicCaller(self):
@@ -185,9 +188,9 @@ try:
                 case 1:
                     print()
                     try:
-                        self.c_equi = float(input("Insérez la mesure du côté désiré : "))
+                        self.c_equi = float(Prompt.ask("[bold yellow]Insérez la mesure du côté désiré "))
                     except ValueError:
-                        print("Veuillez entrer un nombre valide")
+                        console.print("[bold red]Veuillez entrer un nombre valide")
                         self.tlogicCaller()
                     if filling:
                         self.tri_equi(self.c_equi, True, self.chosen_c)
@@ -204,10 +207,10 @@ try:
                 case 2:
                     print()
                     try:
-                        self.th_rect = float(input("Insérez la hauteur désirée du triangle : "))
-                        self.tl_rect = float(input("Insérez la largeur désirée du triangle: "))
+                        self.th_rect = float(Prompt.ask("[bold green]Insérez la hauteur désirée du triangle "))
+                        self.tl_rect = float(Prompt.ask("[bold magenta]Insérez la largeur désirée du triangle "))
                     except ValueError:
-                        print("Veuillez entrer un nombre valide")
+                        console.print("[bold red]Veuillez entrer un nombre valide")
                         self.tlogicCaller()
                     if filling:
                         self.tri_rect(self.th_rect, self.tl_rect, True, self.chosen_c)
@@ -224,10 +227,10 @@ try:
                 case 3:
                     print()
                     try:
-                        self.c_iso = float(input("Insérez le côté désiré pour ce triangle : "))
-                        self.b_iso = float(input("Insérez la mesure de la base :"))
+                        self.c_iso = float(Prompt.ask("[bold yellow]Insérez le côté désiré pour ce triangle "))
+                        self.b_iso = float(input("[bold blue]Insérez la mesure de la base "))
                     except ValueError:
-                        print("Veuillez entrer un nombre valide")
+                        console.print("[bold red]Veuillez entrer un nombre valide")
                         self.tlogicCaller()
                     if filling:
                         self.tri_iso(self.c_iso,self.b_iso, True, self.chosen_c)
@@ -254,7 +257,7 @@ try:
                 prps = f"de coté {self.c_iso} et de base {self.b_iso} pixels"
                 tsrf = f"de surface {tri_isoArea(self.b_iso, h_iso)} pixels ou {cm(tri_isoArea(self.b_iso, h_iso))}"
             print()
-            print(f"Votre {fin}, {prps}, {tsrf} a été dessiné")
+            print(f"[bold cyan]Votre [red]{fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] a été dessiné[/bold cyan] !")
 
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
@@ -312,9 +315,9 @@ try:
         global filled
         print()
         try:
-            fill = input("Voulez vous remplir votre forme ? (y/n) : ")
+            fill = Prompt.ask("[bold magenta]Voulez vous remplir votre forme ? (y/n) ")
         except ValueError:
-            print("Veuillez entrer une option valide")
+            console.print("[bold red]Veuillez entrer une option valide")
             cAsk()
         sleep(0.25)
         if fill == "y":
@@ -325,13 +328,13 @@ try:
             tlogic.outAsk()
 
         elif fill not in ["y", "n"]:
-            print("Veuillez entrer une option valide")
+            console.print("[bold red]Veuillez entrer une option valide")
             cAsk()
         else:
             pass
 except Exception as e:
-    print(f"Une erreur est survenue : {e}")
-    restart = input("Voulez-vous relancer le programme ? (y/n) : ")
+    print(f"[bold red]Une erreur est survenue : [/bold red][yellow]{e}")
+    restart = Prompt.ask("[bold blue]Voulez-vous relancer le programme ? (y/n) [/bold blue]")
     if restart == "y":
         tkickstart()
     else:
