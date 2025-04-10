@@ -2,7 +2,6 @@ import turtle
 from time import sleep
 from tkinter import colorchooser
 from rich.console import Console
-from rich import print
 from rich.prompt import Prompt
 import dessin_autom
 import math
@@ -246,7 +245,7 @@ try:
             if self.tforme == 1 :
                 fin = "triangle équilatéral"
                 prps = f"de coté {self.c_equi} pixels"
-                tsrf = f"de surface {tri_equiArea(self.c_equi, self.c_equi)} ou {cm(tri_equiArea(self.c_equi, self.c_equi))} centimètres"
+                tsrf = f"de surface {tri_equiArea(self.c_equi, self.c_equi)} pixels ou {cm(tri_equiArea(self.c_equi, self.c_equi))} centimètres"
             elif self.tforme == 2:
                 fin = "triangle rectangle"
                 prps = f"de hauteur {self.th_rect} et de largeur {self.tl_rect} pixels"
@@ -257,7 +256,7 @@ try:
                 prps = f"de coté {self.c_iso} et de base {self.b_iso} pixels"
                 tsrf = f"de surface {tri_isoArea(self.b_iso, h_iso)} pixels ou {cm(tri_isoArea(self.b_iso, h_iso))}"
             print()
-            print(f"[bold cyan]Votre [red]{fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] a été dessiné[/bold cyan] !")
+            console.print(f"[bold cyan]Votre [red]{fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] a été dessiné[/bold cyan] !")
 
         def outDraw(self, shape, size, src):
             turtle.pensize(size)

@@ -23,9 +23,9 @@ try:
         try:
             sleep(0.50)
             print()
-            console.print("[bold yellow]1.[/bold yellow] [bold cyan]Carré[/bold cyan]")
-            console.print("[bold yellow]2.[/bold yellow] [bold cyan]Rectangle[/bold cyan]")
-            console.print("[bold yellow]3.[/bold yellow] [bold cyan]Triangles[/bold cyan]")
+            console.print("[bold yellow]1.[/bold yellow] [cyan]Carré[/cyan]")
+            console.print("[bold yellow]2.[/bold yellow] [cyan]Rectangle[/cyan]")
+            console.print("[bold yellow]3.[/bold yellow] [cyan]Triangles[/cyan]")
             print()
             console.print("[underline][bold magenta]Les unités sont en pixels et degrés[/bold magenta][/underline]")
 
