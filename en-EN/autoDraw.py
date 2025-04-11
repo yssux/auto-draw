@@ -1,5 +1,4 @@
 import turtle
-from myFunctions import sqArea, rectArea, px2ToCm2
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
@@ -9,7 +8,11 @@ from rich import print
 from rich.prompt import Prompt
 from tkinter import colorchooser
 from time import sleep
-import transl
+from pathlib import Path
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+from myFunctions import px2ToCm2, sqArea, rectArea
+
 console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
@@ -37,29 +40,35 @@ try:
             console.print("[bold yellow]1.[/bold yellow] [cyan]Square[/cyan]")
             console.print("[bold yellow]2.[/bold yellow] [cyan]Rectangle[/cyan]")
             console.print("[bold yellow]3.[/bold yellow] [cyan]Triangles[/cyan]")
+            console.print("[bold yellow]4.[/bold yellow] [cyan]Circle[/cyan]")
             print()
-            console.print("[underline][bold magenta]Units are in pixels and degrees[/bold magenta][/underline]")
+            console.print("[underline][bold magenta]The units are in pixels and degrees[/bold magenta][/underline]")
 
             # Get user choice with a prompt
             global forme
             print()
-            forme = int(Prompt.ask("[bold blue]Choose an option (1-3) [/bold blue]"))
+            forme = int(Prompt.ask("[bold blue]Choose an option (1-4) [/bold blue]"))
 
             match forme:
                 case 1:
                     print()
-                    console.print("[bold yellow]You chose the square![/bold yellow]")
+                    console.print("[bold yellow]You have chosen the square![/bold yellow]")
                     cAsk()  # Call the square function (cAsk())
                 case 2:
                     print()
-                    console.print("[bold yellow]You chose the rectangle![/bold yellow]")
+                    console.print("[bold yellow]You have chosen the rectangle![/bold yellow]")
                     cAsk()  # Call the rectangle function (cAsk())
                 case 3:
                     print()
-                    console.print("[bold yellow]You chose the triangle![/bold yellow]")
+                    console.print("[bold yellow]You have chosen the triangle![/bold yellow]")
                     console.print()
                     console.print("[underline]Three types are available:[/underline]")
                     triangleTypes.tkickstart()  # Call the triangle types function (tkickstart)
+                case 4:
+                    print()
+                    console.print("[bold yellow]You have chosen the circle![/bold yellow]")
+                    cAsk()
+
 
             if forme not in [1, 2, 3]:
                 console.print("[bold red]This option does not exist[/bold red]")
@@ -124,13 +133,25 @@ try:
         if fill == True:
             t.end_fill()
 
-
+    def circle(rad, fill, source):
+        screen.cv._rootwindow.deiconify()
+        t = turtle.Turtle()
+        if source == None:
+            t.color(blk)
+        elif fill == True and bool(source) == True:
+            fcolor = source
+            t.color(fcolor)
+            t.begin_fill()
+        t.circle(rad)
+        if fill == True:
+            t.end_fill()
 
     class Logic:
         def __init__(self):
             self.square = carr  # Associate square with carr function
             self.rect = rect  # Associate rect with rect function
             self.triangle = triang  # Associate triangle with triang function
+            self.circ = circle #Associate circ with circle function
             self.outColored = None
             self.outSize = 1 # Default outline size
 
@@ -197,7 +218,7 @@ try:
                 case 1:
                     print()
                     try:
-                        self.c_carr = float(Prompt.ask("[bold yellow]Insert the desired side length [/bold yellow]"))
+                        self.c_carr = float(Prompt.ask("[bold yellow]Enter the side length you want [/bold yellow]"))
                     except ValueError:
                         print("[bold red]Please enter a valid number")
                         self.logicCaller()
@@ -215,8 +236,8 @@ try:
                 case 2:
                     print()
                     try:
-                        self.h_rect = float(Prompt.ask("[bold green]Insert the desired height [/bold green]"))
-                        self.l_rect = float(Prompt.ask("[bold yellow]Insert the desired width [/bold yellow]"))
+                        self.h_rect = float(Prompt.ask("[bold green]Enter the desired height [/bold green]"))
+                        self.l_rect = float(Prompt.ask("[bold yellow]Enter the desired width [/bold yellow]"))
                     except ValueError:
                         print("[bold red]Please enter a valid number")
                         self.logicCaller()
@@ -232,19 +253,42 @@ try:
                         self.rect(self.h_rect, self.l_rect, False, None)
                     self.ending()
                     turtle.done()
+                case 4:
+                    print()
+                    try:
+                        self.c_rad = float(Prompt.ask("[bold green]Enter the desired radius [/bold green]"))
+                    except ValueError:
+                        print("[bold red]Please enter a valid number")
+                        self.logicCaller()
+                    if filling:
+                        self.circ(self.c_rad,True, self.chosen_c)
+                    elif not filling:
+                        self.circ(self.c_rad,False, None)
+                    if outlined and self.outColored:
+                        self.outDraw(self.circ, self.outSize, self.outColor)
+                    elif outlined and not self.outColored:
+                        self.outDraw(self.circ, self.outSize, None)
+                    elif not outlined and not filled and not self.outColored:
+                        self.circ(self.c_rad, False, None)
+                    self.ending()
+                    turtle.done()
 
         def ending(self):
             if self.forme == 1 :
                 fin = "square"
                 srf = sqArea(self.c_carr)
-                prps = f"with side {self.c_carr} pixels"
+                prps = f"side {self.c_carr} pixels"
             elif self.forme == 2:
                 fin = "rectangle"
                 srf = rectArea(self.h_rect, self.l_rect)
-                prps = f"with height {self.h_rect} and width {self.l_rect} pixels"
+                prps = f"height {self.h_rect} and width {self.l_rect} pixels"
+            elif self.forme == 4:
+                fin = "circle"
+                srf = round(3.141592653589793 * self.c_rad ** 2, 2)
+                prps = f"radius {self.c_rad} pixels"
             print()
             print(f"[bold cyan]Your {fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
-
+            sys.stdin.readline()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
@@ -261,6 +305,8 @@ try:
                 self.outTri(self.c_tri)
             elif shape == self.rect:
                 self.outRect(self.h_rect, self.l_rect)
+            elif shape == self.circ:
+                self.outCircle(self.c_rad)
 
             turtle.penup()
             turtle.home()
@@ -276,6 +322,8 @@ try:
                 turtle.left(90)
                 turtle.forward(height)
                 turtle.left(90)
+        def outCircle(self, rad):
+            turtle.circle(rad)
 
     logic = Logic()
 

@@ -38,13 +38,14 @@ try:
             console.print("[bold yellow]1.[/bold yellow] [cyan]Carré[/cyan]")
             console.print("[bold yellow]2.[/bold yellow] [cyan]Rectangle[/cyan]")
             console.print("[bold yellow]3.[/bold yellow] [cyan]Triangles[/cyan]")
+            console.print("[bold yellow]4.[/bold yellow] [cyan]Cercle[/cyan]")
             print()
             console.print("[underline][bold magenta]Les unités sont en pixels et degrés[/bold magenta][/underline]")
 
             # Get user choice with a prompt
             global forme
             print()
-            forme = int(Prompt.ask("[bold blue]Choisissez une option (1-3) [/bold blue]"))
+            forme = int(Prompt.ask("[bold blue]Choisissez une option (1-4) [/bold blue]"))
 
             match forme:
                 case 1:
@@ -61,6 +62,11 @@ try:
                     console.print()
                     console.print("[underline]Trois types sont disponibles :[/underline]")
                     triangle_types.tkickstart()  # Call the triangle types function (tkickstart)
+                case 4:
+                    print()
+                    console.print("[bold yellow]Vous avez choisi le cercle![/bold yellow]")
+                    cAsk()
+
 
             if forme not in [1, 2, 3]:
                 console.print("[bold red]Cette option est inexistante[/bold red]")
@@ -125,13 +131,25 @@ try:
         if fill == True:
             t.end_fill()
 
-
+    def circle(rad, fill, source):
+        screen.cv._rootwindow.deiconify()
+        t = turtle.Turtle()
+        if source == None:
+            t.color(blk)
+        elif fill == True and bool(source) == True:
+            fcolor = source
+            t.color(fcolor)
+            t.begin_fill()
+        t.circle(rad)
+        if fill == True:
+            t.end_fill()
 
     class Logic:
         def __init__(self):
             self.square = carr  # Associate square with carr function
             self.rect = rect  # Associate rect with rect function
             self.triangle = triang  # Associate triangle with triang function
+            self.circ = circle #Associate circ with circle function
             self.outColored = None
             self.outSize = 1 # Default outline size
 
@@ -233,6 +251,25 @@ try:
                         self.rect(self.h_rect, self.l_rect, False, None)
                     self.ending()
                     turtle.done()
+                case 4:
+                    print()
+                    try:
+                        self.c_rad = float(Prompt.ask("[bold green]Insérez le rayon désiré [/bold green]"))
+                    except ValueError:
+                        print("[bold red]Veuillez entrer un nombre valide")
+                        self.logicCaller()
+                    if filling:
+                        self.circ(self.c_rad,True, self.chosen_c)
+                    elif not filling:
+                        self.circ(self.c_rad,False, None)
+                    if outlined and self.outColored:
+                        self.outDraw(self.circ, self.outSize, self.outColor)
+                    elif outlined and not self.outColored:
+                        self.outDraw(self.circ, self.outSize, None)
+                    elif not outlined and not filled and not self.outColored:
+                        self.circ(self.c_rad, False, None)
+                    self.ending()
+                    turtle.done()
 
         def ending(self):
             if self.forme == 1 :
@@ -243,9 +280,13 @@ try:
                 fin = "rectangle"
                 srf = rectArea(self.h_rect, self.l_rect)
                 prps = f"de hauteur {self.h_rect} et de largeur {self.l_rect} pixels"
+            elif self.forme == 4:
+                fin = "cercle"
+                srf = round(3.141592653589793 * self.c_rad ** 2, 2)
+                prps = f"de rayon {self.c_rad} pixels"
             print()
             print(f"[bold cyan]Votre {fin}, [bold red]{prps}[/bold red], d'aire [bold red]{srf}[/bold red] pixels ou [bold red]{px2ToCm2(srf)}[/bold red] centimètres a été dessiné ![/bold cyan]")
-
+            sys.stdin.readline()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
@@ -262,6 +303,8 @@ try:
                 self.outTri(self.c_tri)
             elif shape == self.rect:
                 self.outRect(self.h_rect, self.l_rect)
+            elif shape == self.circ:
+                self.outCircle(self.c_rad)
 
             turtle.penup()
             turtle.home()
@@ -277,6 +320,8 @@ try:
                 turtle.left(90)
                 turtle.forward(height)
                 turtle.left(90)
+        def outCircle(self, rad):
+            turtle.circle(rad)
 
     logic = Logic()
 

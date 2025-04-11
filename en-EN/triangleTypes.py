@@ -8,7 +8,9 @@ from pathlib import Path
 import sys
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
+sys.path.append(str(root_path / "en-EN"))
 from myFunctions import px2ToCm2 as cm , tri_equiArea, tri_isoArea, tri_rectArea
+import autoDraw
 ###########Vars#############
 console = Console()
 screen = turtle.Screen()

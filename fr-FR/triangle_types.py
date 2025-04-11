@@ -1,10 +1,19 @@
 import turtle
-from time import sleep
-from tkinter import colorchooser
+import sys
+import os
 from rich.console import Console
+from rich import print
 from rich.prompt import Prompt
+from tkinter import colorchooser
+from time import sleep
+from pathlib import Path
 import math
-from myFunctions import px2ToCm2 as cm , tri_equiArea,tri_isoArea, tri_rectArea
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+sys.path.append(os.path.dirname(__file__))
+sys.path.append(str(root_path / "fr-FR"))
+import dessin_autom
+from myFunctions import px2ToCm2 as cm, tri_equiArea, tri_isoArea, tri_rectArea
 ###########Logic#############
 console = Console()
 screen = turtle.Screen()
