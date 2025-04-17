@@ -2,7 +2,6 @@ import turtle
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
-import triangle_types
 from rich.console import Console
 from rich import print
 from rich.prompt import Prompt
@@ -61,6 +60,7 @@ try:
                     console.print("[bold yellow]Vous avez choisi le triangle ![/bold yellow]")
                     console.print()
                     console.print("[underline]Trois types sont disponibles :[/underline]")
+                    import triangle_types
                     triangle_types.tkickstart()  # Call the triangle types function (tkickstart)
                 case 4:
                     print()

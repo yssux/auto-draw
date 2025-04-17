@@ -12,7 +12,7 @@ root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(str(root_path / "fr-FR"))
-import dessin_autom
+
 from myFunctions import px2ToCm2 as cm, tri_equiArea, tri_isoArea, tri_rectArea
 ###########Logic#############
 console = Console()
@@ -49,6 +49,7 @@ try:
                     console.print("[yellow )Vous avez choisi le triangle isocèle ![/yellow]")
                     cAsk()
                 case 4:
+                    import dessin_autom
                     dessin_autom.kickstart()
             if tforme not in [1, 2, 3]:
                 console.print("[bold red]Cette option est inexistante[/bold red]")

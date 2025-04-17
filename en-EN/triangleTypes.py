@@ -10,7 +10,6 @@ root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
 sys.path.append(str(root_path / "en-EN"))
 from myFunctions import px2ToCm2 as cm , tri_equiArea, tri_isoArea, tri_rectArea
-import autoDraw
 ###########Vars#############
 console = Console()
 screen = turtle.Screen()
@@ -46,6 +45,7 @@ try:
                     console.print("[yellow]You chose the isosceles triangle![/yellow]")
                     cAsk()
                 case 4:
+                    import autoDraw
                     autoDraw.kickstart()
             if tforme not in [1, 2, 3]:
                 console.print("[bold red]This option does not exist[/bold red]")

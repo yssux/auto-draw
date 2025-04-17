@@ -2,7 +2,6 @@ import turtle
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
-import triangleTypes
 from rich.console import Console
 from rich import print
 from rich.prompt import Prompt
@@ -11,8 +10,9 @@ from time import sleep
 from pathlib import Path
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
+sys.path.append(str(root_path / "en-EN"))
 from myFunctions import px2ToCm2, sqArea, rectArea
-
+#############Vars#######################"
 console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
@@ -63,6 +63,7 @@ try:
                     console.print("[bold yellow]You have chosen the triangle![/bold yellow]")
                     console.print()
                     console.print("[underline]Three types are available:[/underline]")
+                    import triangleTypes
                     triangleTypes.tkickstart()  # Call the triangle types function (tkickstart)
                 case 4:
                     print()
