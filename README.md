@@ -24,7 +24,7 @@
     cd auto-draw
     ```
 
-3. Install dependencies (if any):
+3. Install dependencies:
     ```bash
     pip install -r requirements.txt
     ```
@@ -55,4 +55,4 @@ We welcome contributions! If you'd like to improve this project, feel free to fo
 
 ### **Contact**
 
-If you have any questions or suggestions, feel free to open an issue or reach out at [yeddafry@gmail.com].
+If you have any questions or suggestions, feel free to open an issue or reach out at yeddafry@gmail.com .
