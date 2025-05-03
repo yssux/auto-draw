@@ -24,9 +24,9 @@
     cd auto-draw
     ```
 
-3. Install dependencies:
+3. Install ```rich``` (if not installed):
     ```bash
-    pip install -r requirements.txt
+    pip install rich
     ```
 
 4. Run the script:
