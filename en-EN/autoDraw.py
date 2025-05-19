@@ -8,6 +8,7 @@ from rich.prompt import Prompt
 from tkinter import colorchooser
 from time import sleep
 from pathlib import Path
+from PIL import Image
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
 sys.path.append(str(root_path / "en-EN"))
@@ -289,6 +290,18 @@ try:
                 prps = f"radius {self.c_rad} pixels"
             print()
             print(f"[bold cyan]Your {fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
+            exp_confirm = Prompt(f"[yellow]Would you like to export your {fin} to an image format ? (y/n)[/]")
+            if exp_confirm == "y":
+                canvas = screen.getCanvas()
+                canvas.postscript(file="canvas.eps")
+                format = Prompt(f"[bold purple]In what format you'd like to save your {fin} ?[/][white](jpeg/bmp/gif/png)")
+                img = Image.open("canvas.eps")
+                img.save(f"{fin}.{format}",{format.upper()})
+                eps = Prompt(f"[bold purple]Would you like to keep the PostScript file of the {fin}? (y/n)")
+                if eps == "y":
+                    pass
+                elif eps == "n":
+                    os.remove("canvas.eps")
             sys.stdin.readline()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
