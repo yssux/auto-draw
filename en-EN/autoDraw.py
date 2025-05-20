@@ -18,11 +18,11 @@ console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
-turtle.title("Auto Draw")
+turtle.title("autoDraw")
 turtle.hideturtle()
 outline = False
 filled = False
-turtle.bgcolor("#212121")
+turtle.bgcolor("white")
 blk = (0, 0, 0)
 print(r''' [bold yellow]
               _        _____                     
@@ -277,32 +277,29 @@ try:
 
         def ending(self):
             if self.forme == 1 :
-                fin = "square"
+                self.fin = "square"
                 srf = sqArea(self.c_carr)
                 prps = f"side {self.c_carr} pixels"
             elif self.forme == 2:
-                fin = "rectangle"
+                self.self.fin = "rectangle"
                 srf = rectArea(self.h_rect, self.l_rect)
                 prps = f"height {self.h_rect} and width {self.l_rect} pixels"
             elif self.forme == 4:
-                fin = "circle"
+                self.fin = "circle"
                 srf = round(3.141592653589793 * self.c_rad ** 2, 2)
                 prps = f"radius {self.c_rad} pixels"
             print()
-            print(f"[bold cyan]Your {fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
-            exp_confirm = Prompt(f"[yellow]Would you like to export your {fin} to an image format ? (y/n)[/]")
+            print(f"[bold cyan]Your {self.fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
+            self.export_canvas()
+        def export_canvas(self):
+            exp_confirm = Prompt.ask(f"[yellow]Would you like to export your {self.fin} to an image format ? (y/n)[/]")
             if exp_confirm == "y":
-                canvas = screen.getCanvas()
-                canvas.postscript(file="canvas.eps")
-                format = Prompt(f"[bold purple]In what format you'd like to save your {fin} ?[/][white](jpeg/bmp/gif/png)")
-                img = Image.open("canvas.eps")
-                img.save(f"{fin}.{format}",{format.upper()})
-                eps = Prompt(f"[bold purple]Would you like to keep the PostScript file of the {fin}? (y/n)")
-                if eps == "y":
-                    pass
-                elif eps == "n":
-                    os.remove("canvas.eps")
-            sys.stdin.readline()
+                canvas = screen.getcanvas()
+                canvas.postscript(file="canvas.ps", colormode='color')
+                format = str(Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
+                img = Image.open("canvas.ps")
+                img.save(f"{self.fin}.{format}")
+                os.remove("canvas.ps")
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
