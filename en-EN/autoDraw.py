@@ -291,15 +291,35 @@ try:
             print()
             print(f"[bold cyan]Your {self.fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
             self.export_canvas()
+            sys.stdout.readline()
         def export_canvas(self):
-            exp_confirm = Prompt.ask(f"[yellow]Would you like to export your {self.fin} to an image format ? (y/n)[/]")
-            if exp_confirm == "y":
-                canvas = screen.getcanvas()
-                canvas.postscript(file="canvas.ps", colormode='color')
-                format = str(Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
-                img = Image.open("canvas.ps")
-                img.save(f"{self.fin}.{format}")
-                os.remove("canvas.ps")
+            try:
+                try:
+                    exp_confirm = Prompt.ask(f"[yellow]Would you like to export your {self.fin} to an image format ? (y/n)[/]")
+                except ValueError:
+                    print("Choose a valid option")
+                    self.export_canvas()
+                if exp_confirm == "y":
+                    canvas = screen.getcanvas()
+                    canvas.postscript(file="canvas.ps", colormode='color')
+                    try:
+                        format = str(Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
+                    except ValueError:
+                        print("Please choose a valid option")
+                    if format not in ["jpeg","bmp","gif","png"]:
+                        print("Please choose an available format")
+                        self.exp_confirm()
+                    img = Image.open("canvas.ps")
+                    img.save(f"{self.fin}.{format}")
+                    os.remove("canvas.ps")
+                elif exp_confirm == "n":
+                    pass
+                else:
+                    print("Please choose a valid option")
+            except Exception as e:
+                print(f"An error occured while exporting : {e}")
+            finally:
+                sys.stdout.readline()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
