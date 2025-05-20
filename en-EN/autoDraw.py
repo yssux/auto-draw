@@ -17,11 +17,11 @@ console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
-turtle.title("Auto Draw")
+turtle.title("autoDraw")
 turtle.hideturtle()
 outline = False
 filled = False
-turtle.bgcolor("#212121")
+turtle.bgcolor("white")
 blk = (0, 0, 0)
 print(r''' [bold yellow]
               _        _____                     
