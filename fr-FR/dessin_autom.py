@@ -8,6 +8,7 @@ from rich.prompt import Prompt
 from tkinter import colorchooser
 from time import sleep
 from pathlib import Path
+from PIL import Image
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
 from myFunctions import px2ToCm2, sqArea, rectArea
@@ -286,7 +287,36 @@ try:
                 prps = f"de rayon {self.c_rad} pixels"
             print()
             print(f"[bold cyan]Votre {fin}, [bold red]{prps}[/bold red], d'aire [bold red]{srf}[/bold red] pixels ou [bold red]{px2ToCm2(srf)}[/bold red] centimètres a été dessiné ![/bold cyan]")
-            sys.stdin.readline()
+            self.export_canvas()
+        def export_canvas(self):
+            try:
+                try:
+                    exp_confirm = Prompt.ask(f"[yellow]Souhaitez-vous exporter votre {self.fin} au format image ? (y/n)[/]")
+                except ValueError:
+                    print("Choisissez une option valide")
+                    self.export_canvas()
+                if exp_confirm == "y":
+                    canvas = screen.getcanvas()
+                    canvas.postscript(file="canvas.ps", colormode='color')
+                    turtle.bye()
+                    try:
+                        format = str(Prompt.ask(f"[bold purple]Dans quel format souhaitez-vous enregistrer votre {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
+                    except ValueError:
+                        print("Veuillez choisir une option valide")
+                    if format not in ["jpeg", "bmp", "gif", "png"]:
+                        print("Veuillez choisir un format disponible")
+                        self.exp_confirm()
+                    img = Image.open("canvas.ps")
+                    img.save(f"{self.fin}.{format}")
+                    print(f"[bold blue]Votre fichier a été enregistré dans le répertoire de travail actuel (.ps et .{format}).")
+                elif exp_confirm == "n":
+                    pass
+                else:
+                    print("Veuillez choisir une option valide")
+            except Exception as e:
+                print(f"Une erreur est survenue lors de l'exportation : {e}")
+            finally:
+                sys.stdout.readline()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
@@ -308,7 +338,6 @@ try:
 
             turtle.penup()
             turtle.home()
-
         def outSq(self, size):
             for _ in range(4):
                 turtle.forward(size)
@@ -322,10 +351,7 @@ try:
                 turtle.left(90)
         def outCircle(self, rad):
             turtle.circle(rad)
-
     logic = Logic()
-
-
     def cAsk():
         global filled
         print()
