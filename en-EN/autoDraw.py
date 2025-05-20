@@ -301,6 +301,7 @@ try:
                 if exp_confirm == "y":
                     canvas = screen.getcanvas()
                     canvas.postscript(file="canvas.ps", colormode='color')
+                    turtle.bye()
                     try:
                         format = str(Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
                     except ValueError:
@@ -310,7 +311,7 @@ try:
                         self.exp_confirm()
                     img = Image.open("canvas.ps")
                     img.save(f"{self.fin}.{format}")
-                    os.remove("canvas.ps")
+                    print(f"[bold blue]Your File has been saved to the current working directory (.ps and .{format}).")
                 elif exp_confirm == "n":
                     pass
                 else:

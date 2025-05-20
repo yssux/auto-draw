@@ -1,4 +1,5 @@
 import turtle
+import os
 from time import sleep
 from tkinter import colorchooser
 from rich.console import Console
@@ -16,11 +17,11 @@ console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
-turtle.title("Auto Draw")
+turtle.title("autoDraw")
 turtle.hideturtle()
 outline = False
 filled = False
-turtle.bgcolor("#212121")
+turtle.bgcolor("white")
 blk = (0, 0, 0)
 
 #############Start Function#############
@@ -263,7 +264,7 @@ try:
                 tsrf = f"with area {tri_isoArea(self.b_iso, h_iso)} pixels or {cm(tri_isoArea(self.b_iso, h_iso))}"
             print()
             console.print(f"[bold cyan]Your [red]{self.fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] has been drawn[/bold cyan]!")
-            
+            self.export_canvas()
         def export_canvas(self):
             try:
                 try:
@@ -274,6 +275,7 @@ try:
                 if exp_confirm == "y":
                     canvas = screen.getcanvas()
                     canvas.postscript(file="canvas.ps", colormode='color')
+                    turtle.bye()
                     try:
                         format = str(Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
                     except ValueError:
@@ -283,7 +285,7 @@ try:
                         self.exp_confirm()
                     img = Image.open("canvas.ps")
                     img.save(f"{self.fin}.{format}")
-                    os.remove("canvas.ps")
+                    print(f"[bold blue]Your File has been saved to the current working directory (.ps and .{format}).")
                 elif exp_confirm == "n":
                     pass
                 else:
