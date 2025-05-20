@@ -5,6 +5,7 @@ from rich.console import Console
 from rich.prompt import Prompt
 import math
 from pathlib import Path
+from PIL import Image
 import sys
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
@@ -248,21 +249,49 @@ try:
                     turtle.done()
         def ending(self):
             if self.tforme == 1 :
-                fin = "equilateral triangle"
+                self.fin = "equilateral triangle"
                 prps = f"with side {self.c_equi} pixels"
                 tsrf = f"with area {tri_equiArea(self.c_equi, self.c_equi)} pixels or {cm(tri_equiArea(self.c_equi, self.c_equi))} centimeters"
             elif self.tforme == 2:
-                fin = "right triangle"
+                self.fin = "right triangle"
                 prps = f"with height {self.th_rect} and width {self.tl_rect} pixels"
                 tsrf = f"with area {tri_rectArea(self.tl_rect, self.th_rect)} pixels or {cm(tri_rectArea(self.tl_rect,self.th_rect))} centimeters"
             elif self.tforme == 3 :
-                fin = "isosceles triangle"
+                self.fin = "isosceles triangle"
                 h_iso = math.sqrt(self.c_iso ** 2 -(self.b_iso ** 2) / 2)
                 prps = f"with side {self.c_iso} and base {self.b_iso} pixels"
                 tsrf = f"with area {tri_isoArea(self.b_iso, h_iso)} pixels or {cm(tri_isoArea(self.b_iso, h_iso))}"
             print()
-            console.print(f"[bold cyan]Your [red]{fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] has been drawn[/bold cyan]!")
-
+            console.print(f"[bold cyan]Your [red]{self.fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] has been drawn[/bold cyan]!")
+            
+        def export_canvas(self):
+            try:
+                try:
+                    exp_confirm = Prompt.ask(f"[yellow]Would you like to export your {self.fin} to an image format ? (y/n)[/]")
+                except ValueError:
+                    print("Choose a valid option")
+                    self.export_canvas()
+                if exp_confirm == "y":
+                    canvas = screen.getcanvas()
+                    canvas.postscript(file="canvas.ps", colormode='color')
+                    try:
+                        format = str(Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
+                    except ValueError:
+                        print("Please choose a valid option")
+                    if format not in ["jpeg","bmp","gif","png"]:
+                        print("Please choose an available format")
+                        self.exp_confirm()
+                    img = Image.open("canvas.ps")
+                    img.save(f"{self.fin}.{format}")
+                    os.remove("canvas.ps")
+                elif exp_confirm == "n":
+                    pass
+                else:
+                    print("Please choose a valid option")
+            except Exception as e:
+                print(f"An error occured while exporting : {e}")
+            finally:
+                sys.stdout.readline()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()

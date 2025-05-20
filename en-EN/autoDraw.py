@@ -291,7 +291,6 @@ try:
             print()
             print(f"[bold cyan]Your {self.fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
             self.export_canvas()
-            sys.stdout.readline()
         def export_canvas(self):
             try:
                 try:
