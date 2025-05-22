@@ -8,7 +8,8 @@ from rich.prompt import Prompt
 from tkinter import colorchooser
 from time import sleep
 from pathlib import Path
-from PIL import Image
+from PIL import Image, EpsImagePlugin
+import platform
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
 from myFunctions import px2ToCm2, sqArea, rectArea
@@ -30,7 +31,13 @@ print( r'''[bold yellow]
                     | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
                     |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/  [/bold yellow]''')
 #############Start Function#############
-try:
+try:  
+    def set_ghostscript_path():
+        system = platform.system()
+        if system == "Windows":
+            EpsImagePlugin.gs_windows_binary = os.path.abspath("ghostscript/gswin64c.exe")
+        elif system == "Linux":
+            EpsImagePlugin.gs_linux_binary = os.path.abspath("ghostscript/gs")
     def kickstart():
         try:
             sleep(0.50)
@@ -274,19 +281,19 @@ try:
 
         def ending(self):
             if self.forme == 1 :
-                fin = "carré"
+                self.fin = "carré"
                 srf = sqArea(self.c_carr)
                 prps = f"de coté {self.c_carr} pixels"
             elif self.forme == 2:
-                fin = "rectangle"
+                self.fin = "rectangle"
                 srf = rectArea(self.h_rect, self.l_rect)
                 prps = f"de hauteur {self.h_rect} et de largeur {self.l_rect} pixels"
             elif self.forme == 4:
-                fin = "cercle"
+                self.fin = "cercle"
                 srf = round(3.141592653589793 * self.c_rad ** 2, 2)
                 prps = f"de rayon {self.c_rad} pixels"
             print()
-            print(f"[bold cyan]Votre {fin}, [bold red]{prps}[/bold red], d'aire [bold red]{srf}[/bold red] pixels ou [bold red]{px2ToCm2(srf)}[/bold red] centimètres a été dessiné ![/bold cyan]")
+            print(f"[bold cyan]Votre {self.fin}, [bold red]{prps}[/bold red], d'aire [bold red]{srf}[/bold red] pixels ou [bold red]{px2ToCm2(srf)}[/bold red] centimètres a été dessiné ![/bold cyan]")
             self.export_canvas()
         def export_canvas(self):
             try:
