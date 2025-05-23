@@ -11,6 +11,7 @@ from pathlib import Path
 from PIL import Image, EpsImagePlugin
 import platform
 root_path = Path(__file__).resolve().parent.parent
+gs_path = root_path / "ghostscript"
 sys.path.append(str(root_path))
 from myFunctions import px2ToCm2, sqArea, rectArea
 
@@ -30,14 +31,24 @@ print( r'''[bold yellow]
                     | | | |/ _ \/ __/ __| | '_ \    / _ \| | | | __/ _ \ 
                     | |_| |  __/\__ \__ \ | | | |  / ___ \ |_| | || (_) |
                     |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/  [/bold yellow]''')
-#############Start Function#############
-try:  
-    def set_ghostscript_path():
-        system = platform.system()
-        if system == "Windows":
-            EpsImagePlugin.gs_windows_binary = os.path.abspath("ghostscript/gswin64c.exe")
-        elif system == "Linux":
-            EpsImagePlugin.gs_linux_binary = os.path.abspath("ghostscript/gs")
+#############Start Functions#############
+try:
+    def get_gs_executable():
+        if platform.system() == "Windows":
+            possible_paths = [gs_path / "gswin64c.exe"]
+        else:
+            possible_paths = [gs_path / "gs"]
+        for path in possible_paths:
+            if path.exists():
+                return str(path)
+        raise FileNotFoundError("Les binaires Ghostscript n'ont pas été trouvées aux répertoires attendus.")
+    
+    gs_dir = get_gs_executable()
+    if platform.system() == "Windows":
+        EpsImagePlugin.gs_windows_binary = str(gs_path / "gswin64c.exe")
+    else:
+        EpsImagePlugin.gs_linux_binary = str(gs_path / "gs")
+
     def kickstart():
         try:
             sleep(0.50)
@@ -323,7 +334,7 @@ try:
             except Exception as e:
                 print(f"Une erreur est survenue lors de l'exportation : {e}")
             finally:
-                sys.stdout.readline()
+                input("")
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()

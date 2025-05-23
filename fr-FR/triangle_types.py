@@ -1,6 +1,7 @@
 import turtle
 import sys
 import os
+import platform
 from rich.console import Console
 from rich import print
 from rich.prompt import Prompt
@@ -8,8 +9,9 @@ from tkinter import colorchooser
 from time import sleep
 from pathlib import Path
 import math
-from PIL import Image
+from PIL import Image, EpsImagePlugin
 root_path = Path(__file__).resolve().parent.parent
+gs_path = root_path / "ghostscript"
 sys.path.append(str(root_path))
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(str(root_path / "fr-FR"))
@@ -29,6 +31,22 @@ blk = (0, 0, 0)
 
 #############Start Function#############
 try:
+    def get_gs_executable():
+        if platform.system() == "Windows":
+            possible_paths = [gs_path / "gswin32c.exe"]
+        else:
+            possible_paths = [gs_path / "gs"]
+        for path in possible_paths:
+            if path.exists():
+                return str(path)
+        raise FileNotFoundError("Les binaires Ghostscript n'ont pas été trouvées aux répertoires attendus.")
+    
+    gs_dir = get_gs_executable()
+    if platform.system() == "Windows":
+        EpsImagePlugin.gs_windows_binary = gs_path
+    else:
+        EpsImagePlugin.gs_linux_binary = gs_path
+
     def tkickstart():
         try:
             sleep(0.75)
