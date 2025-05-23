@@ -1,21 +1,29 @@
 import turtle
 import sys
 import os
-from rich.console import Console
-from rich import print
-from rich.prompt import Prompt
+import struct
+import platform
+try:
+    from rich.console import Console
+    from rich import print
+    from rich.prompt import Prompt
+    console = Console()
+except ModuleNotFoundError:
+    rich = None
+    console = None
 from tkinter import colorchooser
 from time import sleep
 from pathlib import Path
 import math
+from PIL import Image, EpsImagePlugin
 root_path = Path(__file__).resolve().parent.parent
+gs_path = root_path / "ghostscript"
 sys.path.append(str(root_path))
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(str(root_path / "fr-FR"))
 
 from myFunctions import px2ToCm2 as cm, tri_equiArea, tri_isoArea, tri_rectArea
 ###########Logic#############
-console = Console()
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
@@ -23,11 +31,34 @@ turtle.title("Dessin automatique")
 turtle.hideturtle()
 outline = False
 filled = False
-turtle.bgcolor("#212121")
+turtle.bgcolor("#FFFFFF")
 blk = (0, 0, 0)
 
 #############Start Function#############
 try:
+    def get_gs_executable():
+        arch = struct.calcsize("P")*8
+        if platform.system() == "Windows":
+            if arch == 64:
+                possible_paths = [gs_path / "gswin64c.exe"]
+            else:
+                possible_paths = [gs_path / "gswin32c.exe"]
+        else:
+            if arch == 64:
+                possible_paths = [gs_path / "gs64"]
+            else:
+                possible_paths = [gs_path / "gs32"]
+        for path in possible_paths:
+            if path.exists():
+                return str(path)
+        raise FileNotFoundError("Les binaires Ghostscript n'ont pas été trouvées aux répertoires attendus.")
+    
+    gs_dir = get_gs_executable()
+    if platform.system() == "Windows":
+        EpsImagePlugin.gs_windows_binary = str(gs_path / "gswin64c.exe")
+    else:
+        EpsImagePlugin.gs_linux_binary = str(gs_path / "gs")
+
     def tkickstart():
         try:
             sleep(0.75)
@@ -266,7 +297,39 @@ try:
                 tsrf = f"de surface {tri_isoArea(self.b_iso, h_iso)} pixels ou {cm(tri_isoArea(self.b_iso, h_iso))}"
             print()
             console.print(f"[bold cyan]Votre [red]{fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] a été dessiné[/bold cyan] !")
-
+            self.export_canvas()
+        def export_canvas(self):
+            try:
+                try:
+                    exp_confirm = Prompt.ask(f"[yellow]Souhaitez-vous exporter votre {self.fin} au format image ? (y/n)[/]")
+                except ValueError:
+                    print("[bold red]Choisissez une option valide")
+                    self.export_canvas()
+                if exp_confirm.lower() == "y":
+                    canvas = screen.getcanvas()
+                    canvas.postscript(file="canvas.ps", colormode='color')
+                    turtle.bye()
+                    try:
+                        format = str(Prompt.ask(f"[bold purple]Dans quel format souhaitez-vous enregistrer votre {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
+                    except ValueError:
+                        print("[bold red]Veuillez choisir une option valide")
+                    if format not in ["jpeg","jpg", "bmp", "gif", "png"]:
+                        print("[bold red]Veuillez choisir un format disponible")
+                        return self.export_canvas()
+                    if format == "jpg":
+                        format="jpeg"
+                    img = Image.open("canvas.ps")
+                    img.save(f"{self.fin}.{format.rstrip()}")
+                    print(f"[bold blue]Votre fichier a été enregistré dans le répertoire de travail actuel (.ps et .{format}).")
+                elif exp_confirm.lower() == "n":
+                    pass
+                else:
+                    print("Veuillez choisir une option valide")
+                    return self.export_canvas()
+            except Exception as e:
+                print(f"[bold red]Une erreur est survenue lors de l'exportation : {e}")
+            finally:
+                Prompt.ask("[bold white]Appuyez sur Entrée pour quitter...")
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()

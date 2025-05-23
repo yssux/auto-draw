@@ -24,9 +24,10 @@
     cd auto-draw
     ```
 
-3. Install ```rich``` (if not installed):
+3. Install ```rich``` and ```pillow``` (if not installed):
     ```bash
     pip install rich
+    pip install pillow
     ```
 
 4. Run the script:
