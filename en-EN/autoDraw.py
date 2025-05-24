@@ -1,19 +1,28 @@
 import turtle
 import sys
+import struct
 import os
 sys.path.append(os.path.dirname(__file__))
-from rich.console import Console
-from rich import print
-from rich.prompt import Prompt
+try:
+    from rich.console import Console
+    from rich import print
+    from rich.prompt import Prompt
+    console = Console()
+except ModuleNotFoundError:
+    rich = None
+    console = None
 from tkinter import colorchooser
 from time import sleep
 from pathlib import Path
+from PIL import Image, EpsImagePlugin
+import platform
 root_path = Path(__file__).resolve().parent.parent
+print(root_path)
+gs_path = root_path / "ghostscript"
 sys.path.append(str(root_path))
 sys.path.append(str(root_path / "en-EN"))
 from myFunctions import px2ToCm2, sqArea, rectArea
-#############Vars#######################"
-console = Console()
+#############Vars#######################
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
 turtle.setup(500, 500)
@@ -33,6 +42,29 @@ print(r''' [bold yellow]
                                                                             [/bold yellow] ''')
 #############Start Function#############
 try:
+    def get_gs_executable():
+        arch = struct.calcsize("P")*8
+        if platform.system() == "Windows":
+            if arch == 64:
+                possible_paths = [gs_path / "gswin64c.exe"]
+            else:
+                possible_paths = [gs_path / "gswin32c.exe"]
+        else:
+            if arch == 64:
+                possible_paths = [gs_path / "gs64"]
+            else:
+                possible_paths = [gs_path / "gs32"]
+        for path in possible_paths:
+            if path.exists():
+                return str(path)
+        raise FileNotFoundError("Ghostscript executable not found in expected locations.")
+    
+    gs_dir = get_gs_executable()
+    if platform.system() == "Windows":
+        EpsImagePlugin.gs_windows_binary = str(gs_path / "gswin64c.exe")
+    else:
+        EpsImagePlugin.gs_linux_binary = str(gs_path / "gs")
+
     def kickstart():
         try:
             sleep(0.50)
@@ -276,20 +308,54 @@ try:
 
         def ending(self):
             if self.forme == 1 :
-                fin = "square"
+                self.fin = "square"
                 srf = sqArea(self.c_carr)
                 prps = f"side {self.c_carr} pixels"
             elif self.forme == 2:
-                fin = "rectangle"
+                self.fin = "rectangle"
                 srf = rectArea(self.h_rect, self.l_rect)
                 prps = f"height {self.h_rect} and width {self.l_rect} pixels"
             elif self.forme == 4:
-                fin = "circle"
+                self.fin = "circle"
                 srf = round(3.141592653589793 * self.c_rad ** 2, 2)
                 prps = f"radius {self.c_rad} pixels"
             print()
-            print(f"[bold cyan]Your {fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
-            sys.stdin.readline()
+            print(f"[bold cyan]Your {self.fin}, [bold red]{prps}[/bold red], with an area of [bold red]{srf}[/bold red] pixels or [bold red]{px2ToCm2(srf)}[/bold red] centimeters has been drawn![/bold cyan]")
+            self.export_canvas()
+        def export_canvas(self):
+            try:
+                try:
+                    exp_confirm=Prompt.ask(f"[yellow]Would you like to export your {self.fin} to an image format? (y/n)[/]")
+                except ValueError:
+                    print("[bold red]Choose a valid option.")
+                    return self.export_canvas()
+                if exp_confirm.lower()=="y":
+                    canvas=screen.getcanvas()
+                    canvas.postscript(file="canvas.ps",colormode='color')
+                    turtle.bye()
+                    try:
+                        format=Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin}?[/][white](jpeg/bmp/gif/png) ").lower()
+                    except ValueError:
+                        print("[bold red]Please choose a valid option.")
+                        return self.export_canvas()
+                    fmt_ls=["jpg","jpeg","bmp","gif","png"]
+                    if format not in fmt_ls:
+                        print("[bold red]Please choose an available format.")
+                        return self.export_canvas()
+                    if format=="jpg":
+                        format="jpeg"
+                    img=Image.open("canvas.ps")
+                    img.save(f"{self.fin}.{format.rstrip()}")
+                    print(f"[bold blue]Your file has been saved to the current working directory (.ps and .{format}).[/bold blue]")
+                elif exp_confirm.lower()=="n":
+                    pass
+                else:
+                    print("[bold red]Please choose a valid option.")
+                    return self.export_canvas()
+            except Exception as e:
+                print("[bold red]An error occured while exporting : {e}")
+            finally:
+                input("Press Enter to exit...")
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
