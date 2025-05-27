@@ -9,6 +9,7 @@ try:
     from rich.prompt import Prompt
     console = Console()
 except ModuleNotFoundError:
+    print('Dependency "Rich" not found (no colored outputs)')
     rich = None
     console = None
 from tkinter import colorchooser
@@ -18,7 +19,7 @@ from PIL import Image, EpsImagePlugin
 import platform
 root_path = Path(__file__).resolve().parent.parent
 print(root_path)
-gs_path = root_path / "ghostscript"
+gs_path = root_path / "bin" / "ghostscript"
 sys.path.append(str(root_path))
 sys.path.append(str(root_path / "en-EN"))
 from myFunctions import px2ToCm2, sqArea, rectArea
@@ -332,7 +333,7 @@ try:
                 if exp_confirm.lower()=="y":
                     canvas=screen.getcanvas()
                     canvas.postscript(file="canvas.ps",colormode='color')
-                    turtle.bye()
+                    screen.cv._rootwindow.withdraw()
                     try:
                         format=Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin}?[/][white](jpeg/bmp/gif/png) ").lower()
                     except ValueError:
@@ -355,7 +356,9 @@ try:
             except Exception as e:
                 print("[bold red]An error occured while exporting : {e}")
             finally:
+                turtle.bye()
                 input("Press Enter to exit...")
+                sys.exit()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
