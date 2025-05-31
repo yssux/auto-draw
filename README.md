@@ -1,6 +1,6 @@
 # **autoDraw**
 
-**autoDraw** is a Python script that allows users to draw various geometric shapes (such as squares, rectangles, and triangles) using the `turtle` graphics module. This project is run via the command line interface (CLI), where users can select the shape and customize its appearance.
+**autoDraw** is a Python script that allows users to draw various geometric shapes (such as squares, rectangles, and triangles) using the `turtle` graphics module. This project is run via the command line interface (CLI), where users can select the shape and customize its appearance (The source code is 248 MB, will be trying to make subversions for each OS/architecture. For now, you may download the source code).
 
 ---
 
