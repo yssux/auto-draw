@@ -9,6 +9,7 @@ try:
     from rich.prompt import Prompt
     console = Console()
 except ModuleNotFoundError:
+    print("Librairie Rich introuvable (stdout sans couleurs)")
     rich = None
     console = None
 from tkinter import colorchooser
