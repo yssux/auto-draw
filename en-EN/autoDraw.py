@@ -18,6 +18,7 @@ from time import sleep
 from pathlib import Path
 from PIL import Image, EpsImagePlugin
 import platform
+from myFunctions import px2ToCm2, sqArea, rectArea
 #############Vars#######################
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
@@ -32,12 +33,11 @@ turtle.bgcolor("white")
 blk = (0, 0, 0)
 arch = struct.calcsize("P")*8
 root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+sys.path.append(str(root_path / "en-EN"))
 print(root_path)
 gs_path = root_path / "bin" / "ghostscript"
 pdf2svg_binpath = str(root_path / "bin" / "pdf2svg")
-sys.path.append(str(root_path))
-sys.path.append(str(root_path / "en-EN"))
-from myFunctions import px2ToCm2, sqArea, rectArea
 print(r''' [bold yellow]
               _        _____                     
              | |      |  __ \                    
@@ -357,6 +357,7 @@ try:
                     if format != "svg":
                         img=Image.open("canvas.ps")
                         img.save(f"{self.fin}.{format.rstrip()}")
+                        img.close()
                     elif format == "svg":
                         pdf_path = root_path / f"{self.fin}.pdf"
                         svg_path = root_path / f"{self.fin}.svg"
@@ -385,10 +386,13 @@ try:
             except Exception as e:
                 print("[bold red]An error occured while exporting : {e}")
             finally:
-                if ps_path.exists():
-                    ps_path.unlink()
-                if pdf_path.exists():
-                    pdf_path.unlink()
+                if pdf_path != False or ps_path != False:
+                    if pdf_path.exists():
+                        pdf_path.unlink()
+                    if ps_path.exists():
+                        ps_path.unlink()
+                else:
+                    pass
                 input("Press Enter to exit...")
                 sys.exit()
         def outDraw(self, shape, size, src):

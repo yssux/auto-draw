@@ -2,6 +2,7 @@ import turtle
 import sys
 import os
 import struct
+import subprocess as sb
 sys.path.append(os.path.dirname(__file__))
 try:
     from rich.console import Console
@@ -9,7 +10,7 @@ try:
     from rich.prompt import Prompt
     console = Console()
 except ModuleNotFoundError:
-    print("Librairie Rich introuvable (stdout sans couleurs)")
+    print("Module Rich introuvable (stdout sans couleurs)")
     rich = None
     console = None
 from tkinter import colorchooser
@@ -18,19 +19,27 @@ from pathlib import Path
 from PIL import Image, EpsImagePlugin
 import platform
 root_path = Path(__file__).resolve().parent.parent
-gs_path = root_path / "ghostscript"
 sys.path.append(str(root_path))
+sys.path.append(str(root_path / "en-EN"))
 from myFunctions import px2ToCm2, sqArea, rectArea
-
+#########################Vars###########################
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
+twindow = screen.getcanvas().winfo_toplevel()
+twindow.geometry("600x600")
 turtle.setup(500, 500)
-turtle.title("Dessin automatique")
+turtle.title("autoDraw")
 turtle.hideturtle()
 outline = False
-filled = False
-turtle.bgcolor("#FFFFFF")
+filled = False 
+turtle.bgcolor("white")
 blk = (0, 0, 0)
+arch = struct.calcsize("P")*8
+print(root_path)
+gs_path = root_path / "bin" / "ghostscript"
+pdf2svg_binpath = str(root_path / "bin" / "pdf2svg")
+pdf_path = None
+ps_path = None
 print( r'''[bold yellow]   
                      ____                _            _         _        
                     |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
@@ -39,28 +48,33 @@ print( r'''[bold yellow]
                     |____/ \___||___/___/_|_| |_| /_/    \_\__,_|\__\___/  [/bold yellow]''')
 #############Start Functions#############
 try:
-    def get_gs_executable():
-        arch = struct.calcsize("P")*8
+    def get_gs_binpath():
         if platform.system() == "Windows":
             if arch == 64:
-                possible_paths = [gs_path / "gswin64c.exe"]
+                possible_paths = [gs_path / "win" / "gswin64c.exe"]
             else:
-                possible_paths = [gs_path / "gswin32c.exe"]
+                possible_paths = [gs_path / "win"/ "gswin32c.exe"]
         else:
             if arch == 64:
-                possible_paths = [gs_path / "gs64"]
+                possible_paths = [gs_path / "linux" / "gs64"]
             else:
-                possible_paths = [gs_path / "gs32"]
+                possible_paths = [gs_path / "linux" / "gs32"]
         for path in possible_paths:
             if path.exists():
                 return str(path)
         raise FileNotFoundError("Les binaires Ghostscript n'ont pas été trouvées aux répertoires attendus.")
     
-    gs_dir = get_gs_executable()
+    gs_dir = get_gs_binpath()
     if platform.system() == "Windows":
-        EpsImagePlugin.gs_windows_binary = str(gs_path / "gswin64c.exe")
+        if arch == "64":
+            EpsImagePlugin.gs_windows_binary = str(gs_path / "win" / "gswin64c.exe")
+        else:
+            EpsImagePlugin.gs_windows_binary = str(gs_path / "win" / "gswin32c.exe")
     else:
-        EpsImagePlugin.gs_linux_binary = str(gs_path / "gs")
+        if arch == "32":
+            EpsImagePlugin.gs_linux_binary = str(gs_path / "linux" / "gs32")
+        else:
+            EpsImagePlugin.gs_linux_binary = str(gs_path / "linux" / "gs64")
 
     def kickstart():
         try:
@@ -322,25 +336,47 @@ try:
         def export_canvas(self):
             try:
                 try:
-                    exp_confirm = Prompt.ask(f"[yellow]Souhaitez-vous exporter votre {self.fin} au format image ? (y/n)[/]")
+                    exp_confirm = Prompt.ask(f"[bold yellow]Souhaitez-vous exporter votre {self.fin} au format image ? (y/n)[/]")
                 except ValueError:
                     print("[bold red]Choisissez une option valide")
-                    self.export_canvas()
+                    return self.export_canvas()
                 if exp_confirm.lower() == "y":
                     canvas = screen.getcanvas()
                     canvas.postscript(file="canvas.ps", colormode='color')
-                    turtle.bye()
+                    screen.cv._rootwindow.withdraw()
                     try:
-                        format = str(Prompt.ask(f"[bold purple]Dans quel format souhaitez-vous enregistrer votre {self.fin} ?[/][white](jpeg/bmp/gif/png)"))
+                        format = str(Prompt.ask(f"[bold purple]Dans quel format souhaitez-vous enregistrer votre {self.fin} ?[/][white](jpeg/bmp/gif/png/svg)"))
                     except ValueError:
                         print("[bold red]Veuillez choisir une option valide")
-                    if format not in ["jpeg","jpg", "bmp", "gif", "png"]:
+                    fmt_ls = ["jpeg","jpg", "bmp", "gif", "png", "svg"]
+                    if format not in fmt_ls:
                         print("[bold red]Veuillez choisir un format disponible")
                         return self.export_canvas()
                     if format == "jpg":
                         format="jpeg"
-                    img = Image.open("canvas.ps")
-                    img.save(f"{self.fin}.{format.rstrip()}")
+                    ps_path = root_path / "canvas.ps"
+                    pdf_path = root_path / f"{self.fin}.pdf"
+                    if format != "svg":
+                        img = Image.open("canvas.ps")
+                        img.save(f"{self.fin}.{format.rstrip()}")
+                        img.close()
+                    elif "format" == "svg":
+                        svg_path = root_path / f"{self.fin}.svg"  
+                        if platform.system() == "Windows":
+                            gs_exec = "gswin64c.exe" if arch == "64" else "gswin32c.exe"
+                            pdf2svg_exec = "win_svg64.exe" if arch == "64" else "win_svg32.exe"
+                            gs_full_path = gs_path / "win" / gs_exec
+                            pdf2svg_full_path = Path(pdf2svg_binpath) / "win" / pdf2svg_exec
+                        elif platform.system() == "Linux":
+                            gs_exec = "gs64" if arch == "64" else "gs32"
+                            pdf2svg_exec = "pdf2svg64" if arch == "64" else "pdf2svg32"
+                            gs_full_path = root_path / "linux" / gs_exec
+                            pdf2svg_full_path = Path(pdf2svg_binpath) / "linux" / pdf2svg_exec
+                        else:
+                            print("[bold red]Your system isn't currently supported![/bold red]")
+                            return
+                        sb.run([str(gs_full_path), "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)], check=True)
+                        sb.run([str(pdf2svg_full_path), str(pdf_path), str(svg_path)], check=True)
                     print(f"[bold blue]Votre fichier a été enregistré dans le répertoire de travail actuel (.ps et .{format}).")
                 elif exp_confirm.lower() == "n":
                     pass
@@ -350,6 +386,13 @@ try:
             except Exception as e:
                 print(f"[bold red]Une erreur est survenue lors de l'exportation : {e}")
             finally:
+                if pdf_path != False or ps_path != False:
+                    if pdf_path.exists():
+                        pdf_path.unlink()
+                    if ps_path.exists():
+                        ps_path.unlink()
+                else:
+                    pass
                 Prompt.ask("[bold white]Appuyez sur Entrée pour quitter...")
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
