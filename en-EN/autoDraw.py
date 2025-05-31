@@ -3,7 +3,6 @@ import sys
 import struct
 import os
 import subprocess as sb
-sys.path.append(os.path.dirname(__file__))
 try:
     from rich.console import Console
     from rich import print
@@ -18,7 +17,6 @@ from time import sleep
 from pathlib import Path
 from PIL import Image, EpsImagePlugin
 import platform
-from myFunctions import px2ToCm2, sqArea, rectArea
 #############Vars#######################
 screen = turtle.Screen()
 screen.cv._rootwindow.withdraw()
@@ -35,6 +33,7 @@ arch = struct.calcsize("P")*8
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
 sys.path.append(str(root_path / "en-EN"))
+from myFunctions import px2ToCm2, sqArea, rectArea
 print(root_path)
 gs_path = root_path / "bin" / "ghostscript"
 pdf2svg_binpath = str(root_path / "bin" / "pdf2svg")

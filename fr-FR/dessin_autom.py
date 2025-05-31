@@ -31,15 +31,17 @@ turtle.setup(500, 500)
 turtle.title("autoDraw")
 turtle.hideturtle()
 outline = False
-filled = False 
+filled = False
 turtle.bgcolor("white")
 blk = (0, 0, 0)
 arch = struct.calcsize("P")*8
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
+sys.path.append(str(root_path / "en-EN"))
+from myFunctions import px2ToCm2, sqArea, rectArea
 print(root_path)
 gs_path = root_path / "bin" / "ghostscript"
 pdf2svg_binpath = str(root_path / "bin" / "pdf2svg")
-pdf_path = None
-ps_path = None
 print( r'''[bold yellow]   
                      ____                _            _         _        
                     |  _ \  ___  ___ ___(_)_ __      / \  _   _| |_ ___  
@@ -394,6 +396,7 @@ try:
                 else:
                     pass
                 Prompt.ask("[bold white]Appuyez sur Entrée pour quitter...")
+                sys.exit()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
