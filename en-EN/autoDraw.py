@@ -432,7 +432,6 @@ try:
 
     logic = Logic()
 
-
     def cAsk():
         global filled
         print()
