@@ -36,7 +36,7 @@ sys.path.append(str(root_path))
 from myFunctions import px2ToCm2 as cm , tri_equiArea, tri_isoArea, tri_rectArea
 sys.path.append(str(root_path / "en-EN"))
 gs_path = root_path / "bin" / "ghostscript"
-pdf2svg_binpath = str(root_path / "bin" / "pdf2svg")
+pdf2svg_binpath = root_path / "bin" / "pdf2svg"
 #############Start Function#############
 try:
     def get_gs_binpath():
@@ -56,12 +56,12 @@ try:
         raise FileNotFoundError("Les binaires Ghostscript n'ont pas été trouvées aux répertoires attendus.")
     gs_dir = get_gs_binpath()
     if platform.system() == "Windows":
-        if arch == "64":
+        if arch == 64:
             EpsImagePlugin.gs_windows_binary = str(gs_path / "win" / "gswin64c.exe")
         else:
             EpsImagePlugin.gs_windows_binary = str(gs_path / "win" / "gswin32c.exe")
     else:
-        if arch == "32":
+        if arch == 32:
             EpsImagePlugin.gs_linux_binary = str(gs_path / "linux" / "gs32")
         else:
             EpsImagePlugin.gs_linux_binary = str(gs_path / "linux" / "gs64")
@@ -168,6 +168,10 @@ try:
             self.tri_equi = tri_equi  # Associate triangle with triang function
             self.outColored = None
             self.outSize = 1 # Default outline size
+            # export temp paths
+            self.pdf_path = None
+            self.ps_path = None
+            self.svg_path = None
 
         def cChooser(self, outline):
             gui_chooser = colorchooser.askcolor()
@@ -304,68 +308,80 @@ try:
             console.print(f"[bold cyan]Votre [red]{fin}[/red], [red]{prps}[/red], [red]{tsrf}[/red] a été dessiné[/bold cyan] !")
             self.export_canvas()
         def export_canvas(self):
+            pdf_path = None
+            ps_path = None
             try:
                 try:
-                    exp_confirm=Prompt.ask(f"[yellow]Would you like to export your {self.fin} to an image format? (y/n)[/]")
+                    exp_confirm = Prompt.ask(f"[yellow]Would you like to export your {self.fin} to an image format? (y/n)[/]")
                 except ValueError:
                     print("[bold red]Choose a valid option.")
                     return self.export_canvas()
-                if exp_confirm.lower()=="y":
-                    canvas=screen.getcanvas()
-                    canvas.postscript(file="canvas.ps",colormode='color')
+                if exp_confirm.lower() == "y":
+                    canvas = screen.getcanvas()
+                    canvas.postscript(file="canvas.ps", colormode='color')
                     screen.cv._rootwindow.withdraw()
                     try:
-                        format=Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin}?[/][white](jpeg/bmp/gif/png/svg) ").lower()
+                        fmt = Prompt.ask(f"[bold purple]In what format you'd like to save your {self.fin}?[/][white](jpeg/bmp/gif/png/svg) ")
                     except ValueError:
                         print("[bold red]Please choose a valid option.")
                         return self.export_canvas()
-                    fmt_ls=["jpg","jpeg","bmp","gif","png", "svg"]
-                    if format not in fmt_ls:
+                    fmt = str(fmt).lower().strip()
+                    fmt_ls = ["jpg", "jpeg", "bmp", "gif", "png", "svg"]
+                    if fmt not in fmt_ls:
                         print("[bold red]Please choose an available format.")
                         return self.export_canvas()
-                    if format=="jpg":
-                        format="jpeg"
-                    if format != "svg":
-                        img=Image.open("canvas.ps")
-                        img.save(f"{self.fin}.{format.rstrip()}")
+                    if fmt == "jpg":
+                        fmt = "jpeg"
+                    ps_path = root_path / "canvas.ps"
+                    pdf_path = root_path / f"{self.fin}.pdf"
+                    if fmt != "svg":
+                        img = Image.open(str(ps_path))
+                        img.save(f"{self.fin}.{fmt}")
                         img.close()
-                    elif format == "svg":
-                        pdf_path = root_path / f"{self.fin}.pdf"
-                        svg_path = root_path / f"{self.fin}.svg"
-                        ps_path = root_path / "canvas.ps"
-                        if platform.system() == "Windows":
-                            gs_exec = "gswin64c.exe" if arch == "64" else "gswin32c.exe"
-                            pdf2svg_exec = "win_svg64.exe" if arch == "64" else "win_svg32.exe"
-                            gs_full_path = gs_path / "win" / gs_exec
-                            pdf2svg_full_path = Path(pdf2svg_binpath) / "win" / pdf2svg_exec
-                        elif platform.system() == "Linux":
-                            gs_exec = "gs64" if arch == "64" else "gs32"
-                            pdf2svg_exec = "pdf2svg64" if arch == "64" else "pdf2svg32"
-                            gs_full_path = root_path / "linux" / gs_exec
-                            pdf2svg_full_path = Path(pdf2svg_binpath) / "linux" / pdf2svg_exec
-                        else:
-                            print("[bold red]Your system isn't currently supported![/bold red]")
+                    else:
+                        try:
+                            sb.run([str(gs_dir), "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)], check=True)
+                        except Exception as e:
+                            print(f"[bold red]Error creating PDF: {e}[/bold red]")
                             return
-                        sb.run([str(gs_full_path), "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)], check=True)
-                        sb.run([str(pdf2svg_full_path), str(pdf_path), str(svg_path)], check=True)
-                    print(f"[bold blue]Your file has been saved to the current working directory (in .{format}).[/bold blue]")
-                elif exp_confirm.lower()=="n":
+                        import shutil
+                        pdf2svg_cmd = shutil.which("pdf2svg")
+                        if not pdf2svg_cmd:
+                            candidates = [pdf2svg_binpath / "win" / "pdf2svg.exe", pdf2svg_binpath / "win" / "pdf2svg64.exe", pdf2svg_binpath / "linux" / "pdf2svg64", pdf2svg_binpath / "linux" / "pdf2svg32"]
+                            for c in candidates:
+                                if c.exists():
+                                    pdf2svg_cmd = str(c)
+                                    break
+                        if not pdf2svg_cmd:
+                            print("[bold red]pdf2svg not found. Install it or add to PATH.[/bold red]")
+                            return
+                        svg_path = root_path / f"{self.fin}.svg"
+                        try:
+                            sb.run([str(pdf2svg_cmd), str(pdf_path), str(svg_path)], check=True)
+                        except Exception as e:
+                            print(f"[bold red]Error converting to SVG: {e}[/bold red]")
+                            return
+                    print(f"[bold blue]Your file has been saved to the current working directory (in .{fmt}).[/bold blue]")
+                elif exp_confirm.lower() == "n":
                     pass
                 else:
                     print("[bold red]Please choose a valid option.")
                     return self.export_canvas()
             except Exception as e:
-                print("[bold red]An error occured while exporting : {e}")
+                print(f"[bold red]An error occured while exporting : {e}")
             finally:
-                if pdf_path != False or ps_path != False:
-                    if pdf_path.exists():
+                try:
+                    if pdf_path and pdf_path.exists():
                         pdf_path.unlink()
-                    if ps_path.exists():
+                except Exception:
+                    pass
+                try:
+                    if ps_path and ps_path.exists():
                         ps_path.unlink()
-                else:
+                except Exception:
                     pass
                 input("Press Enter to exit...")
-                sys.exit()  
+                sys.exit()
         def outDraw(self, shape, size, src):
             turtle.pensize(size)
             turtle.penup()
