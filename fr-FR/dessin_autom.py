@@ -3,6 +3,9 @@ import sys
 import os
 import struct
 import subprocess as sb
+import tempfile
+import shutil
+import uuid
 sys.path.append(os.path.dirname(__file__))
 try:
     from rich.console import Console
@@ -73,6 +76,14 @@ try:
             EpsImagePlugin.gs_linux_binary = str(gs_path / "linux" / "gs32")
         else:
             EpsImagePlugin.gs_linux_binary = str(gs_path / "linux" / "gs64")
+
+    def run_cmd(args, timeout=None):
+        """Run a command and return (returncode, stdout, stderr)."""
+        try:
+            proc = sb.run(list(map(str, args)), capture_output=True, text=True, timeout=timeout)
+            return proc.returncode, proc.stdout, proc.stderr
+        except Exception as e:
+            return -1, "", str(e)
 
     def kickstart():
         try:
@@ -367,28 +378,63 @@ try:
                         img.save(f"{self.fin}.{fmt}")
                         img.close()
                     else:
-                        try:
-                            sb.run([str(gs_dir), "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)], check=True)
-                        except Exception as e:
-                            print(f"[bold red]Erreur lors de la création du PDF : {e}[/bold red]")
+                        # create PDF using Ghostscript and capture output
+                        rc, out, err = run_cmd([gs_dir, "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)])
+                        if rc != 0:
+                            print(f"[bold red]Erreur lors de la création du PDF : returncode={rc}\n{err}[/bold red]")
                             return
-                        import shutil
-                        pdf2svg_cmd = shutil.which("pdf2svg")
-                        if not pdf2svg_cmd:
-                            candidates = [pdf2svg_binpath / "win" / "pdf2svg.exe", pdf2svg_binpath / "win" / "pdf2svg64.exe", pdf2svg_binpath / "linux" / "pdf2svg64", pdf2svg_binpath / "linux" / "pdf2svg32"]
-                            for c in candidates:
-                                if c.exists():
-                                    pdf2svg_cmd = str(c)
+                        # prepare pdf2svg command candidates
+                        import shutil as _shutil
+                        pdf2svg_cmd = _shutil.which("pdf2svg")
+                        candidates = []
+                        if pdf2svg_cmd:
+                            candidates.append(Path(pdf2svg_cmd))
+                        # prefer architecture-specific and existing repo binaries
+                        candidates += [pdf2svg_binpath / "win" / "pdf2svg64.exe", pdf2svg_binpath / "win" / "pdf2svg.exe", pdf2svg_binpath / "win" / "win_svg64.exe", pdf2svg_binpath / "win" / "win_svg32.exe", pdf2svg_binpath / "linux" / "pdf2svg64", pdf2svg_binpath / "linux" / "pdf2svg32"]
+                        chosen = None
+                        for c in candidates:
+                            try:
+                                if isinstance(c, Path):
+                                    if not c.exists():
+                                        continue
+                                    cand = str(c)
+                                else:
+                                    cand = str(c)
+                                # quick validation: --help or --version
+                                v_rc, v_out, v_err = run_cmd([cand, "--version"])
+                                if v_rc == 0 or v_out or v_err:
+                                    chosen = cand
                                     break
-                        if not pdf2svg_cmd:
-                            print("[bold red]pdf2svg introuvable. Installez pdf2svg ou ajoutez-le au PATH.[/bold red]")
+                            except Exception:
+                                continue
+                        if not chosen:
+                            print("[bold red]pdf2svg introuvable ou invalide. Installez pdf2svg ou ajoutez-le au PATH.[/bold red]")
                             return
                         svg_path = root_path / f"{self.fin}.svg"
+                        # use ASCII-only temp files for subprocess calls to avoid encoding issues
+                        temp_dir = Path(tempfile.gettempdir())
+                        temp_pdf = temp_dir / (uuid.uuid4().hex + ".pdf")
+                        temp_svg = temp_dir / (uuid.uuid4().hex + ".svg")
                         try:
-                            sb.run([str(pdf2svg_cmd), str(pdf_path), str(svg_path)], check=True)
-                        except Exception as e:
-                            print(f"[bold red]Erreur lors de la conversion vers SVG : {e}[/bold red]")
-                            return
+                            shutil.copy2(str(pdf_path), str(temp_pdf))
+                            # try conversion, print child stderr on failure and try no more than once per candidate
+                            conv_rc, conv_out, conv_err = run_cmd([chosen, str(temp_pdf), str(temp_svg)], timeout=30)
+                            if conv_rc != 0 or not temp_svg.exists():
+                                print(f"[bold red]Erreur lors de la conversion vers SVG (pdf2svg): rc={conv_rc}\n{conv_err}\n{conv_out}[/bold red]")
+                                return
+                            # move generated svg to final location
+                            shutil.move(str(temp_svg), str(svg_path))
+                        finally:
+                            try:
+                                if temp_pdf.exists():
+                                    temp_pdf.unlink()
+                            except Exception:
+                                pass
+                            try:
+                                if temp_svg.exists():
+                                    temp_svg.unlink()
+                            except Exception:
+                                pass
                     print(f"[bold blue]Votre fichier a été enregistré dans le répertoire de travail actuel (.ps et .{fmt}).")
                 elif exp_confirm.lower() == "n":
                     pass

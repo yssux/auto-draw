@@ -1,3 +1,4 @@
+import subprocess as sb
 def map_value(x, in_min, in_max, out_min, out_max):
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 def frange(start, stop):
@@ -24,3 +25,10 @@ def tri_isoArea(base, height):
     return round(0.5 * base * height, 2)
 def tri_rectArea(base, height):
     return round(0.5 * base * height, 2)
+def run_cmd(args, timeout=None):
+        """Run a command and return (returncode, stdout, stderr)."""
+        try:
+            proc = sb.run(list(map(str, args)), capture_output=True, text=True, timeout=timeout)
+            return proc.returncode, proc.stdout, proc.stderr
+        except Exception as e:
+            return -1, "", str(e)

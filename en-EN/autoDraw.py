@@ -3,6 +3,9 @@ import sys
 import struct
 import os
 import subprocess as sb
+import tempfile
+import shutil
+import uuid
 try:
     from rich.console import Console
     from rich import print
@@ -33,7 +36,7 @@ arch = struct.calcsize("P")*8
 root_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_path))
 sys.path.append(str(root_path / "en-EN"))
-from myFunctions import px2ToCm2, sqArea, rectArea
+from myFunctions import px2ToCm2, sqArea, rectArea, run_cmd 
 print(root_path)
 gs_path = root_path / "bin" / "ghostscript"
 pdf2svg_binpath = root_path / "bin" / "pdf2svg"
@@ -365,28 +368,55 @@ try:
                         img.save(f"{self.fin}.{fmt}")
                         img.close()
                     else:
-                        try:
-                            sb.run([str(gs_dir), "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)], check=True)
-                        except Exception as e:
-                            print(f"[bold red]Error creating PDF: {e}[/bold red]")
+                        rc, out, err = run_cmd([gs_dir, "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)])
+                        if rc != 0:
+                            print(f"[bold red]Error creating PDF: returncode={rc}\n{err}[/bold red]")
                             return
-                        import shutil
                         pdf2svg_cmd = shutil.which("pdf2svg")
-                        if not pdf2svg_cmd:
-                            candidates = [pdf2svg_binpath / "win" / "pdf2svg.exe", pdf2svg_binpath / "win" / "pdf2svg64.exe", pdf2svg_binpath / "linux" / "pdf2svg64", pdf2svg_binpath / "linux" / "pdf2svg32"]
-                            for c in candidates:
-                                if c.exists():
-                                    pdf2svg_cmd = str(c)
+                        candidates = []
+                        if pdf2svg_cmd:
+                            candidates.append(Path(pdf2svg_cmd))
+                        candidates += [pdf2svg_binpath / "win" / "pdf2svg64.exe", pdf2svg_binpath / "win" / "pdf2svg.exe", pdf2svg_binpath / "win" / "win_svg64.exe", pdf2svg_binpath / "win" / "win_svg32.exe", pdf2svg_binpath / "linux" / "pdf2svg64", pdf2svg_binpath / "linux" / "pdf2svg32"]
+                        chosen = None
+                        for c in candidates:
+                            try:
+                                if isinstance(c, Path):
+                                    if not c.exists():
+                                        continue
+                                    cand = str(c)
+                                else:
+                                    cand = str(c)
+                                v_rc, v_out, v_err = run_cmd([cand, "--version"])
+                                if v_rc == 0 or v_out or v_err:
+                                    chosen = cand
                                     break
-                        if not pdf2svg_cmd:
-                            print("[bold red]pdf2svg not found. Install it or add to PATH.[/bold red]")
+                            except Exception:
+                                continue
+                        if not chosen:
+                            print("[bold red]pdf2svg not found or invalid. Install it or add to PATH.[/bold red]")
                             return
                         svg_path = root_path / f"{self.fin}.svg"
+                        temp_dir = Path(tempfile.gettempdir())
+                        temp_pdf = temp_dir / (uuid.uuid4().hex + ".pdf")
+                        temp_svg = temp_dir / (uuid.uuid4().hex + ".svg")
                         try:
-                            sb.run([str(pdf2svg_cmd), str(pdf_path), str(svg_path)], check=True)
-                        except Exception as e:
-                            print(f"[bold red]Error converting to SVG: {e}[/bold red]")
-                            return
+                            shutil.copy2(str(pdf_path), str(temp_pdf))
+                            conv_rc, conv_out, conv_err = run_cmd([chosen, str(temp_pdf), str(temp_svg)], timeout=30)
+                            if conv_rc != 0 or not temp_svg.exists():
+                                print(f"[bold red]Error converting to SVG (pdf2svg): rc={conv_rc}\n{conv_err}\n{conv_out}[/bold red]")
+                                return
+                            shutil.move(str(temp_svg), str(svg_path))
+                        finally:
+                            try:
+                                if temp_pdf.exists():
+                                    temp_pdf.unlink()
+                            except Exception:
+                                pass
+                            try:
+                                if temp_svg.exists():
+                                    temp_svg.unlink()
+                            except Exception:
+                                pass
                     print(f"[bold blue]Your file has been saved to the current working directory (in .{fmt}).[/bold blue]")
                 elif exp_confirm.lower() == "n":
                     pass
