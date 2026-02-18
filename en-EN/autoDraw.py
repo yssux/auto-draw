@@ -358,9 +358,9 @@ try:
                         img.save(f"{self.fin}.{format.rstrip()}")
                         img.close()
                     elif format == "svg":
-                        pdf_path = root_path / f"{self.fin}.pdf"
-                        svg_path = root_path / f"{self.fin}.svg"
-                        ps_path = root_path / "canvas.ps"
+                        self.pdf_path = root_path / f"{self.fin}.pdf"
+                        self.svg_path = root_path / f"{self.fin}.svg"
+                        self.ps_path = root_path / "canvas.ps"
                         if platform.system() == "Windows":
                             gs_exec = "gswin64c.exe" if arch == "64" else "gswin32c.exe"
                             pdf2svg_exec = "win_svg64.exe" if arch == "64" else "win_svg32.exe"
@@ -374,7 +374,7 @@ try:
                         else:
                             print("[bold red]Your system isn't currently supported![/bold red]")
                             return
-                        sb.run([str(gs_full_path), "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(pdf_path)}", str(ps_path)], check=True)
+                        sb.run([str(gs_full_path), "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", f"-sOutputFile={str(self.pdf_path)}", str(self.ps_path)], check=True)
                         sb.run([str(pdf2svg_full_path), str(pdf_path), str(svg_path)], check=True)
                     print(f"[bold blue]Your file has been saved to the current working directory (in .{format}).[/bold blue]")
                 elif exp_confirm.lower()=="n":
@@ -385,13 +385,10 @@ try:
             except Exception as e:
                 print("[bold red]An error occured while exporting : {e}")
             finally:
-                if pdf_path != False or ps_path != False:
-                    if pdf_path.exists():
-                        pdf_path.unlink()
-                    if ps_path.exists():
-                        ps_path.unlink()
-                else:
-                    pass
+                if self.pdf_path in locals() and self.pdf_path is not None and hasattr(self.pdf_path, 'exists') and self.pdf_path.exists():
+                    self.pdf_path.unlink()
+                if self.ps_path in locals() and self.ps_path is not None and hasattr(self.ps_path, 'exists') and self.ps_path.exists():
+                    self.ps_path.unlink()
                 input("Press Enter to exit...")
                 sys.exit()
         def outDraw(self, shape, size, src):
