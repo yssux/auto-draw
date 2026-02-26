@@ -1,7 +1,7 @@
 import importlib.util
 import os
 import sys
-
+#from phone
 def lan_sel():
     lang = input("Language/Langue (EN-FR): ").strip().upper()
 
