@@ -24,7 +24,7 @@
     cd auto-draw
     ```
 
-3. Install ```rich``` and ```pillow``` (if not installed):
+3. Install ```rich``` and ```pillow``` (rich is optional if you do not want coloured stdout):
     ```bash
     pip install rich
     pip install pillow
